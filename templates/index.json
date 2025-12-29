@@ -64,7 +64,7 @@
         "full_width": true,
         "slide_height": 650,
         "mobile_height": 400,
-        "content_position": "top-center",
+        "content_position": "bottom-left",
         "transition_speed": 500,
         "autoplay": true,
         "autoplay_speed": 5,

@@ -24,6 +24,7 @@
         },
         "slide_gP7kCy": {
           "type": "slide",
+          "disabled": true,
           "settings": {
             "image": "shopify://shop_images/Sintitulo_1080x1920px_11_copy.png",
             "heading": "Slide heading",
@@ -34,6 +35,7 @@
         },
         "slide_TRmRqa": {
           "type": "slide",
+          "disabled": true,
           "settings": {
             "image": "shopify://shop_images/10_c816da26-91a0-4b40-822c-8c9e55462d25.png",
             "heading": "New arrivals",
@@ -44,6 +46,7 @@
         },
         "slide_hqinai": {
           "type": "slide",
+          "disabled": true,
           "settings": {
             "image": "shopify://shop_images/12_fe1de80c-7b95-45f1-81d7-151ea49e8258.png",
             "heading": "Special offers",

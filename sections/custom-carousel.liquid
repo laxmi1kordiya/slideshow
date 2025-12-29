@@ -1,0 +1,1121 @@
+{% comment %}
+  Custom Carousel Section - All-in-One (CSS, JS, HTML)
+  Performance Optimized - No external dependencies
+{% endcomment %}
+
+{%- liquid
+  assign section_id = section.id
+  assign heading = section.settings.heading
+  assign heading_size = section.settings.heading_size
+  assign slides_desktop = section.settings.slides_desktop
+  assign slides_mobile = section.settings.slides_mobile
+  assign autoplay = section.settings.autoplay
+  assign autoplay_speed = section.settings.autoplay_speed
+  assign show_arrows = section.settings.show_arrows
+  assign show_dots = section.settings.show_dots
+  assign infinite_loop = section.settings.infinite_loop
+  assign gap = section.settings.slide_gap
+  assign animation_speed = section.settings.animation_speed
+  assign pause_on_hover = section.settings.pause_on_hover
+-%}
+
+{% style %}
+  /* Custom Carousel - Scoped Styles */
+  #carousel-{{ section_id }} {
+    --carousel-gap: {{ gap }}px;
+    --carousel-slides-desktop: {{ slides_desktop }};
+    --carousel-slides-mobile: {{ slides_mobile }};
+    --carousel-animation: {{ animation_speed }}ms;
+  }
+
+  .carousel-section {
+    position: relative;
+    width: 100%;
+    padding: 20px 0;
+    contain: layout style;
+  }
+
+  .carousel-section__heading {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .carousel-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .carousel-track-container {
+    overflow: hidden;
+    width: 100%;
+    margin: 0 auto;
+    touch-action: pan-y pinch-zoom;
+  }
+
+  .carousel-track {
+    display: flex;
+    gap: var(--carousel-gap, 16px);
+    transition: transform var(--carousel-animation, 400ms) ease-out;
+    will-change: transform;
+  }
+
+  .carousel-track[data-animating="true"] {
+    pointer-events: none;
+  }
+
+  .carousel-slide {
+    flex: 0 0 calc((100% - (var(--carousel-slides-mobile, 1) - 1) * var(--carousel-gap, 16px)) / var(--carousel-slides-mobile, 1));
+    min-width: 0;
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  @media (min-width: 750px) {
+    .carousel-slide {
+      flex: 0 0 calc((100% - (var(--carousel-slides-desktop, 4) - 1) * var(--carousel-gap, 16px)) / var(--carousel-slides-desktop, 4));
+    }
+  }
+
+  .carousel-slide__link,
+  .carousel-slide__product,
+  .carousel-slide__collection {
+    display: block;
+    position: relative;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .carousel-slide__image {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    display: block;
+    background-color: #f5f5f5;
+  }
+
+  .carousel-slide__image--background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+  }
+
+  .carousel-slide__placeholder {
+    aspect-ratio: 1 / 1;
+    background-color: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 20px;
+  }
+
+  .carousel-slide__placeholder svg {
+    width: 50%;
+    height: auto;
+    opacity: 0.5;
+  }
+
+  .carousel-slide__content {
+    position: absolute;
+    padding: 16px;
+    z-index: 2;
+    max-width: 80%;
+  }
+
+  .carousel-slide__content::before {
+    content: "";
+    position: absolute;
+    inset: -8px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    z-index: -1;
+  }
+
+  .carousel-slide__content--top-left { top: 16px; left: 16px; }
+  .carousel-slide__content--top-center { top: 16px; left: 50%; transform: translateX(-50%); text-align: center; }
+  .carousel-slide__content--top-right { top: 16px; right: 16px; text-align: right; }
+  .carousel-slide__content--center-left { top: 50%; left: 16px; transform: translateY(-50%); }
+  .carousel-slide__content--center-center { top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+  .carousel-slide__content--center-right { top: 50%; right: 16px; transform: translateY(-50%); text-align: right; }
+  .carousel-slide__content--bottom-left { bottom: 16px; left: 16px; }
+  .carousel-slide__content--bottom-center { bottom: 16px; left: 50%; transform: translateX(-50%); text-align: center; }
+  .carousel-slide__content--bottom-right { bottom: 16px; right: 16px; text-align: right; }
+
+  .carousel-slide__subheading {
+    display: block;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+
+  .carousel-slide__heading {
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+    margin: 0 0 8px;
+  }
+
+  .carousel-slide__button {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 14px;
+  }
+
+  .carousel-slide__product-info {
+    padding: 12px 0;
+  }
+
+  .carousel-slide__product-title {
+    font-size: 14px;
+    font-weight: 500;
+    margin: 0 0 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .carousel-slide__product-price {
+    font-size: 14px;
+    margin: 0;
+  }
+
+  .carousel-slide__product-compare {
+    color: #999;
+    margin-left: 8px;
+  }
+
+  .carousel-slide__collection {
+    position: relative;
+  }
+
+  .carousel-slide__collection-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 16px;
+    background: linear-gradient(transparent, rgba(0,0,0,0.7));
+    color: #fff;
+  }
+
+  .carousel-slide__collection-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 4px;
+  }
+
+  .carousel-slide__collection-count {
+    font-size: 12px;
+    opacity: 0.8;
+  }
+
+  .carousel-slide__custom {
+    position: relative;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .carousel-slide__custom-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+  }
+
+  .carousel-slide__icon {
+    margin-bottom: 12px;
+  }
+
+  .carousel-slide__icon svg {
+    width: 48px;
+    height: 48px;
+  }
+
+  .carousel-slide__custom-heading {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 8px;
+  }
+
+  .carousel-slide__custom-text {
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+
+  .carousel-slide__testimonial {
+    padding: 24px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    height: 100%;
+  }
+
+  .carousel-slide__testimonial-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .carousel-slide__testimonial-stars {
+    display: flex;
+    gap: 2px;
+    margin-bottom: 12px;
+    color: #ffc107;
+  }
+
+  .carousel-slide__testimonial-quote {
+    font-size: 15px;
+    line-height: 1.6;
+    font-style: italic;
+    margin: 0 0 16px;
+    flex-grow: 1;
+  }
+
+  .carousel-slide__testimonial-author {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: auto;
+  }
+
+  .carousel-slide__testimonial-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .carousel-slide__testimonial-author-info {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .carousel-slide__testimonial-name {
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .carousel-slide__testimonial-title {
+    font-size: 12px;
+    color: #666;
+  }
+
+  .carousel-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+
+  .carousel-arrow:hover {
+    transform: translateY(-50%) scale(1.1);
+  }
+
+  .carousel-arrow:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .carousel-arrow--prev { left: 8px; }
+  .carousel-arrow--next { right: 8px; }
+
+  @media (min-width: 750px) {
+    .carousel-arrow--prev { left: -20px; }
+    .carousel-arrow--next { right: -20px; }
+  }
+
+  .carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .carousel-dot {
+    width: 10px;
+    height: 10px;
+    border: none;
+    border-radius: 50%;
+    background: #ccc;
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.2s, transform 0.2s;
+  }
+
+  .carousel-dot:hover {
+    transform: scale(1.2);
+  }
+
+  .carousel-dot--active {
+    background: #333;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .carousel-track {
+      transition: none;
+    }
+    .carousel-arrow:hover,
+    .carousel-dot:hover {
+      transform: none;
+    }
+  }
+{% endstyle %}
+
+<div
+  id="carousel-{{ section_id }}"
+  class="carousel-section"
+  data-carousel
+  data-autoplay="{{ autoplay }}"
+  data-autoplay-speed="{{ autoplay_speed }}"
+  data-slides-desktop="{{ slides_desktop }}"
+  data-slides-mobile="{{ slides_mobile }}"
+  data-infinite="{{ infinite_loop }}"
+  data-animation-speed="{{ animation_speed }}"
+  data-pause-hover="{{ pause_on_hover }}"
+>
+  {% if heading != blank %}
+    <h2 class="carousel-section__heading {{ heading_size }}">
+      {{ heading | escape }}
+    </h2>
+  {% endif %}
+
+  <div class="carousel-wrapper">
+    {% if show_arrows %}
+      <button
+        type="button"
+        class="carousel-arrow carousel-arrow--prev"
+        aria-label="{{ 'accessibility.previous_slide' | t | default: 'Previous slide' }}"
+        data-carousel-prev
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </button>
+    {% endif %}
+
+    <div class="carousel-track-container">
+      <div class="carousel-track" data-carousel-track>
+        {% for block in section.blocks %}
+          {%- liquid
+            assign is_first_visible = false
+            if forloop.index <= slides_desktop
+              assign is_first_visible = true
+            endif
+          -%}
+
+          <div
+            class="carousel-slide carousel-slide--{{ block.type }}"
+            data-carousel-slide
+            data-index="{{ forloop.index0 }}"
+            {{ block.shopify_attributes }}
+          >
+            {% case block.type %}
+              {% when 'image' %}
+                {% if block.settings.image != blank %}
+                  <a
+                    {% if block.settings.link != blank %}href="{{ block.settings.link }}"{% endif %}
+                    class="carousel-slide__link"
+                  >
+                    <img
+                      src="{{ block.settings.image | image_url: width: 800 }}"
+                      srcset="
+                        {{ block.settings.image | image_url: width: 400 }} 400w,
+                        {{ block.settings.image | image_url: width: 600 }} 600w,
+                        {{ block.settings.image | image_url: width: 800 }} 800w,
+                        {{ block.settings.image | image_url: width: 1200 }} 1200w
+                      "
+                      sizes="(max-width: 749px) calc(100vw / {{ slides_mobile }}), calc(100vw / {{ slides_desktop }})"
+                      alt="{{ block.settings.image.alt | escape | default: block.settings.heading }}"
+                      width="{{ block.settings.image.width }}"
+                      height="{{ block.settings.image.height }}"
+                      {% if is_first_visible %}loading="eager" fetchpriority="high"{% else %}loading="lazy"{% endif %}
+                      class="carousel-slide__image"
+                    >
+                    {% if block.settings.heading != blank or block.settings.subheading != blank %}
+                      <div class="carousel-slide__content carousel-slide__content--{{ block.settings.text_position }}">
+                        {% if block.settings.subheading != blank %}
+                          <span class="carousel-slide__subheading">{{ block.settings.subheading }}</span>
+                        {% endif %}
+                        {% if block.settings.heading != blank %}
+                          <h3 class="carousel-slide__heading">{{ block.settings.heading }}</h3>
+                        {% endif %}
+                        {% if block.settings.button_label != blank %}
+                          <span class="carousel-slide__button button-primary">{{ block.settings.button_label }}</span>
+                        {% endif %}
+                      </div>
+                    {% endif %}
+                  </a>
+                {% else %}
+                  <div class="carousel-slide__placeholder">
+                    {{ 'image' | placeholder_svg_tag: 'placeholder--image' }}
+                  </div>
+                {% endif %}
+
+              {% when 'product' %}
+                {%- assign slide_product = block.settings.product -%}
+                {% if slide_product != blank %}
+                  <a href="{{ slide_product.url }}" class="carousel-slide__product">
+                    {% if slide_product.featured_image != blank %}
+                      <img
+                        src="{{ slide_product.featured_image | image_url: width: 600 }}"
+                        srcset="
+                          {{ slide_product.featured_image | image_url: width: 300 }} 300w,
+                          {{ slide_product.featured_image | image_url: width: 450 }} 450w,
+                          {{ slide_product.featured_image | image_url: width: 600 }} 600w
+                        "
+                        sizes="(max-width: 749px) calc(100vw / {{ slides_mobile }}), calc(100vw / {{ slides_desktop }})"
+                        alt="{{ slide_product.featured_image.alt | escape | default: slide_product.title }}"
+                        width="{{ slide_product.featured_image.width }}"
+                        height="{{ slide_product.featured_image.height }}"
+                        {% if is_first_visible %}loading="eager"{% else %}loading="lazy"{% endif %}
+                        class="carousel-slide__image"
+                      >
+                    {% endif %}
+                    <div class="carousel-slide__product-info">
+                      <h3 class="carousel-slide__product-title">{{ slide_product.title }}</h3>
+                      <p class="carousel-slide__product-price">
+                        {{ slide_product.price | money }}
+                        {% if slide_product.compare_at_price > slide_product.price %}
+                          <s class="carousel-slide__product-compare">{{ slide_product.compare_at_price | money }}</s>
+                        {% endif %}
+                      </p>
+                    </div>
+                  </a>
+                {% else %}
+                  <div class="carousel-slide__placeholder">
+                    {{ 'product-1' | placeholder_svg_tag: 'placeholder--image' }}
+                    <p>{{ 'onboarding.product.title' | t }}</p>
+                  </div>
+                {% endif %}
+
+              {% when 'collection' %}
+                {%- assign slide_collection = block.settings.collection -%}
+                {% if slide_collection != blank %}
+                  <a href="{{ slide_collection.url }}" class="carousel-slide__collection">
+                    {% if slide_collection.featured_image != blank or block.settings.custom_image != blank %}
+                      {%- assign collection_image = block.settings.custom_image | default: slide_collection.featured_image -%}
+                      <img
+                        src="{{ collection_image | image_url: width: 800 }}"
+                        srcset="
+                          {{ collection_image | image_url: width: 400 }} 400w,
+                          {{ collection_image | image_url: width: 600 }} 600w,
+                          {{ collection_image | image_url: width: 800 }} 800w
+                        "
+                        sizes="(max-width: 749px) calc(100vw / {{ slides_mobile }}), calc(100vw / {{ slides_desktop }})"
+                        alt="{{ collection_image.alt | escape | default: slide_collection.title }}"
+                        width="{{ collection_image.width }}"
+                        height="{{ collection_image.height }}"
+                        {% if is_first_visible %}loading="eager"{% else %}loading="lazy"{% endif %}
+                        class="carousel-slide__image"
+                      >
+                    {% endif %}
+                    <div class="carousel-slide__collection-info">
+                      <h3 class="carousel-slide__collection-title">{{ slide_collection.title }}</h3>
+                      <span class="carousel-slide__collection-count">{{ slide_collection.products_count }} {{ 'collections.general.items' | t | default: 'products' }}</span>
+                    </div>
+                  </a>
+                {% else %}
+                  <div class="carousel-slide__placeholder">
+                    {{ 'collection-1' | placeholder_svg_tag: 'placeholder--image' }}
+                  </div>
+                {% endif %}
+
+              {% when 'custom' %}
+                <div
+                  class="carousel-slide__custom"
+                  style="background-color: {{ block.settings.background_color }}; color: {{ block.settings.text_color }};"
+                >
+                  {% if block.settings.image != blank %}
+                    <img
+                      src="{{ block.settings.image | image_url: width: 800 }}"
+                      srcset="{{ block.settings.image | image_url: width: 400 }} 400w, {{ block.settings.image | image_url: width: 800 }} 800w"
+                      sizes="(max-width: 749px) calc(100vw / {{ slides_mobile }}), calc(100vw / {{ slides_desktop }})"
+                      alt="{{ block.settings.image.alt | escape }}"
+                      width="{{ block.settings.image.width }}"
+                      height="{{ block.settings.image.height }}"
+                      {% if is_first_visible %}loading="eager"{% else %}loading="lazy"{% endif %}
+                      class="carousel-slide__image carousel-slide__image--background"
+                    >
+                  {% endif %}
+                  <div class="carousel-slide__custom-content">
+                    {% if block.settings.icon != blank %}
+                      <div class="carousel-slide__icon">{{ block.settings.icon }}</div>
+                    {% endif %}
+                    {% if block.settings.heading != blank %}
+                      <h3 class="carousel-slide__custom-heading">{{ block.settings.heading }}</h3>
+                    {% endif %}
+                    {% if block.settings.text != blank %}
+                      <div class="carousel-slide__custom-text">{{ block.settings.text }}</div>
+                    {% endif %}
+                    {% if block.settings.button_label != blank and block.settings.button_link != blank %}
+                      <a href="{{ block.settings.button_link }}" class="carousel-slide__custom-button button-primary">
+                        {{ block.settings.button_label }}
+                      </a>
+                    {% endif %}
+                  </div>
+                </div>
+
+              {% when 'testimonial' %}
+                <div class="carousel-slide__testimonial">
+                  <div class="carousel-slide__testimonial-content">
+                    {% if block.settings.rating > 0 %}
+                      <div class="carousel-slide__testimonial-stars" aria-label="{{ block.settings.rating }} out of 5 stars">
+                        {% for i in (1..5) %}
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="{% if i <= block.settings.rating %}currentColor{% else %}none{% endif %}" stroke="currentColor" stroke-width="1">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                          </svg>
+                        {% endfor %}
+                      </div>
+                    {% endif %}
+                    {% if block.settings.quote != blank %}
+                      <blockquote class="carousel-slide__testimonial-quote">"{{ block.settings.quote }}"</blockquote>
+                    {% endif %}
+                    <div class="carousel-slide__testimonial-author">
+                      {% if block.settings.author_image != blank %}
+                        <img
+                          src="{{ block.settings.author_image | image_url: width: 80 }}"
+                          alt="{{ block.settings.author_name | escape }}"
+                          width="40"
+                          height="40"
+                          loading="lazy"
+                          class="carousel-slide__testimonial-avatar"
+                        >
+                      {% endif %}
+                      <div class="carousel-slide__testimonial-author-info">
+                        {% if block.settings.author_name != blank %}
+                          <span class="carousel-slide__testimonial-name">{{ block.settings.author_name }}</span>
+                        {% endif %}
+                        {% if block.settings.author_title != blank %}
+                          <span class="carousel-slide__testimonial-title">{{ block.settings.author_title }}</span>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+            {% endcase %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    {% if show_arrows %}
+      <button
+        type="button"
+        class="carousel-arrow carousel-arrow--next"
+        aria-label="{{ 'accessibility.next_slide' | t | default: 'Next slide' }}"
+        data-carousel-next
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
+    {% endif %}
+  </div>
+
+  {% if show_dots and section.blocks.size > 1 %}
+    <div class="carousel-dots" data-carousel-dots>
+      {% for block in section.blocks %}
+        <button
+          type="button"
+          class="carousel-dot {% if forloop.first %}carousel-dot--active{% endif %}"
+          data-carousel-dot="{{ forloop.index0 }}"
+          aria-label="Go to slide {{ forloop.index }}"
+        ></button>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+
+<script>
+  (function() {
+    const container = document.getElementById('carousel-{{ section_id }}');
+    if (!container || container.dataset.init) return;
+    container.dataset.init = 'true';
+
+    const track = container.querySelector('[data-carousel-track]');
+    const slides = Array.from(container.querySelectorAll('[data-carousel-slide]'));
+    const prevBtn = container.querySelector('[data-carousel-prev]');
+    const nextBtn = container.querySelector('[data-carousel-next]');
+    const dots = Array.from(container.querySelectorAll('[data-carousel-dot]'));
+
+    const settings = {
+      autoplay: container.dataset.autoplay === 'true',
+      autoplaySpeed: parseInt(container.dataset.autoplaySpeed, 10) || 5000,
+      slidesDesktop: parseInt(container.dataset.slidesDesktop, 10) || 4,
+      slidesMobile: parseInt(container.dataset.slidesMobile, 10) || 1,
+      infinite: container.dataset.infinite === 'true',
+      animationSpeed: parseInt(container.dataset.animationSpeed, 10) || 400,
+      pauseOnHover: container.dataset.pauseHover === 'true'
+    };
+
+    let currentIndex = 0;
+    let isAnimating = false;
+    let autoplayInterval = null;
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    const getSlidesPerView = () => window.innerWidth >= 750 ? settings.slidesDesktop : settings.slidesMobile;
+    const getMaxIndex = () => Math.max(0, slides.length - getSlidesPerView());
+
+    function updatePosition(animate = true) {
+      if (!track || !slides.length) return;
+      const slideWidth = slides[0].offsetWidth;
+      const gap = parseFloat(getComputedStyle(track).gap) || 0;
+      const offset = currentIndex * (slideWidth + gap);
+
+      if (animate) {
+        isAnimating = true;
+        track.dataset.animating = 'true';
+        setTimeout(() => {
+          isAnimating = false;
+          track.dataset.animating = 'false';
+        }, settings.animationSpeed);
+      } else {
+        track.style.transition = 'none';
+        requestAnimationFrame(() => { track.style.transition = ''; });
+      }
+      track.style.transform = `translateX(-${offset}px)`;
+    }
+
+    function updateNav() {
+      if (prevBtn) prevBtn.disabled = !settings.infinite && currentIndex === 0;
+      if (nextBtn) nextBtn.disabled = !settings.infinite && currentIndex >= getMaxIndex();
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('carousel-dot--active', i === currentIndex || (i === getMaxIndex() && currentIndex >= getMaxIndex()));
+      });
+    }
+
+    function prev() {
+      if (isAnimating) return;
+      currentIndex = currentIndex > 0 ? currentIndex - 1 : (settings.infinite ? getMaxIndex() : 0);
+      updatePosition(true);
+      updateNav();
+    }
+
+    function next() {
+      if (isAnimating) return;
+      currentIndex = currentIndex < getMaxIndex() ? currentIndex + 1 : (settings.infinite ? 0 : getMaxIndex());
+      updatePosition(true);
+      updateNav();
+    }
+
+    function goTo(index) {
+      if (isAnimating || index === currentIndex) return;
+      currentIndex = Math.min(Math.max(0, index), getMaxIndex());
+      updatePosition(true);
+      updateNav();
+    }
+
+    function startAutoplay() {
+      stopAutoplay();
+      autoplayInterval = setInterval(next, settings.autoplaySpeed);
+    }
+
+    function stopAutoplay() {
+      if (autoplayInterval) { clearInterval(autoplayInterval); autoplayInterval = null; }
+    }
+
+    // Hide nav if not needed
+    if (slides.length <= getSlidesPerView()) {
+      if (prevBtn) prevBtn.style.display = 'none';
+      if (nextBtn) nextBtn.style.display = 'none';
+      container.querySelector('[data-carousel-dots]')?.style.setProperty('display', 'none');
+      return;
+    }
+
+    // Events
+    if (prevBtn) prevBtn.addEventListener('click', prev);
+    if (nextBtn) nextBtn.addEventListener('click', next);
+    dots.forEach((dot, i) => dot.addEventListener('click', () => goTo(i)));
+
+    // Touch
+    track.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; stopAutoplay(); }, { passive: true });
+    track.addEventListener('touchmove', e => { touchEndX = e.touches[0].clientX; }, { passive: true });
+    track.addEventListener('touchend', () => {
+      const diff = touchStartX - touchEndX;
+      if (Math.abs(diff) > 50) diff > 0 ? next() : prev();
+      if (settings.autoplay) startAutoplay();
+    });
+
+    // Hover pause
+    if (settings.pauseOnHover && settings.autoplay) {
+      container.addEventListener('mouseenter', stopAutoplay);
+      container.addEventListener('mouseleave', startAutoplay);
+    }
+
+    // Resize
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        if (currentIndex > getMaxIndex()) currentIndex = getMaxIndex();
+        updatePosition(false);
+        updateNav();
+      }, 100);
+    });
+
+    // Keyboard
+    container.addEventListener('keydown', e => {
+      if (e.key === 'ArrowLeft') prev();
+      if (e.key === 'ArrowRight') next();
+    });
+
+    updateNav();
+    if (settings.autoplay) startAutoplay();
+
+    // Shopify editor support
+    if (window.Shopify?.designMode) {
+      document.addEventListener('shopify:section:load', e => {
+        if (e.detail.sectionId === '{{ section_id }}') location.reload();
+      });
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Custom Carousel",
+  "tag": "section",
+  "class": "carousel-section-wrapper",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Featured"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "options": [
+        { "value": "h3", "label": "Small" },
+        { "value": "h2", "label": "Medium" },
+        { "value": "h1", "label": "Large" }
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "header",
+      "content": "Slides Settings"
+    },
+    {
+      "type": "range",
+      "id": "slides_desktop",
+      "label": "Slides per view (Desktop)",
+      "min": 1,
+      "max": 6,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "slides_mobile",
+      "label": "Slides per view (Mobile)",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "slide_gap",
+      "label": "Gap between slides",
+      "min": 0,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Autoplay"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Enable autoplay",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "autoplay_speed",
+      "label": "Autoplay speed",
+      "min": 2000,
+      "max": 9500,
+      "step": 500,
+      "unit": "ms",
+      "default": 5000
+    },
+    {
+      "type": "checkbox",
+      "id": "pause_on_hover",
+      "label": "Pause on hover",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Navigation"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_arrows",
+      "label": "Show arrows",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_dots",
+      "label": "Show dots",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "infinite_loop",
+      "label": "Infinite loop",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "animation_speed",
+      "label": "Animation speed",
+      "min": 200,
+      "max": 1000,
+      "step": 100,
+      "unit": "ms",
+      "default": 400
+    }
+  ],
+  "blocks": [
+    {
+      "type": "image",
+      "name": "Image Slide",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading"
+        },
+        {
+          "type": "text",
+          "id": "subheading",
+          "label": "Subheading"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label"
+        },
+        {
+          "type": "select",
+          "id": "text_position",
+          "label": "Text position",
+          "options": [
+            { "value": "top-left", "label": "Top left" },
+            { "value": "top-center", "label": "Top center" },
+            { "value": "top-right", "label": "Top right" },
+            { "value": "center-left", "label": "Center left" },
+            { "value": "center-center", "label": "Center" },
+            { "value": "center-right", "label": "Center right" },
+            { "value": "bottom-left", "label": "Bottom left" },
+            { "value": "bottom-center", "label": "Bottom center" },
+            { "value": "bottom-right", "label": "Bottom right" }
+          ],
+          "default": "bottom-left"
+        }
+      ]
+    },
+    {
+      "type": "product",
+      "name": "Product Slide",
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Product"
+        }
+      ]
+    },
+    {
+      "type": "collection",
+      "name": "Collection Slide",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "image_picker",
+          "id": "custom_image",
+          "label": "Custom image",
+          "info": "Overrides collection image"
+        }
+      ]
+    },
+    {
+      "type": "custom",
+      "name": "Custom Content",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Background image"
+        },
+        {
+          "type": "color",
+          "id": "background_color",
+          "label": "Background color",
+          "default": "#f5f5f5"
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Text color",
+          "default": "#000000"
+        },
+        {
+          "type": "html",
+          "id": "icon",
+          "label": "Icon (SVG or HTML)"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text"
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button link"
+        }
+      ]
+    },
+    {
+      "type": "testimonial",
+      "name": "Testimonial",
+      "settings": [
+        {
+          "type": "range",
+          "id": "rating",
+          "label": "Star rating",
+          "min": 0,
+          "max": 5,
+          "step": 1,
+          "default": 5
+        },
+        {
+          "type": "textarea",
+          "id": "quote",
+          "label": "Quote",
+          "default": "This is an amazing product!"
+        },
+        {
+          "type": "image_picker",
+          "id": "author_image",
+          "label": "Author image"
+        },
+        {
+          "type": "text",
+          "id": "author_name",
+          "label": "Author name",
+          "default": "John Doe"
+        },
+        {
+          "type": "text",
+          "id": "author_title",
+          "label": "Author title",
+          "default": "Verified Customer"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Custom Carousel",
+      "blocks": [
+        { "type": "image" },
+        { "type": "image" },
+        { "type": "image" },
+        { "type": "image" }
+      ]
+    },
+    {
+      "name": "Product Carousel",
+      "settings": {
+        "heading": "Featured Products"
+      },
+      "blocks": [
+        { "type": "product" },
+        { "type": "product" },
+        { "type": "product" },
+        { "type": "product" }
+      ]
+    },
+    {
+      "name": "Collection Carousel",
+      "settings": {
+        "heading": "Shop by Category"
+      },
+      "blocks": [
+        { "type": "collection" },
+        { "type": "collection" },
+        { "type": "collection" },
+        { "type": "collection" }
+      ]
+    },
+    {
+      "name": "Testimonials Carousel",
+      "settings": {
+        "heading": "What Our Customers Say",
+        "slides_desktop": 3
+      },
+      "blocks": [
+        { "type": "testimonial" },
+        { "type": "testimonial" },
+        { "type": "testimonial" }
+      ]
+    }
+  ]
+}
+{% endschema %}

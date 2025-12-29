@@ -72,6 +72,24 @@
     object-fit: cover;
   }
 
+  #slider-{{ section_id }} .slider__image--mobile {
+    display: block;
+  }
+
+  #slider-{{ section_id }} .slider__image--desktop {
+    display: none;
+  }
+
+  @media (min-width: 750px) {
+    #slider-{{ section_id }} .slider__image--mobile {
+      display: none;
+    }
+
+    #slider-{{ section_id }} .slider__image--desktop {
+      display: block;
+    }
+  }
+
   #slider-{{ section_id }} .slider__overlay {
     position: absolute;
     inset: 0;
@@ -295,25 +313,43 @@
           {{ block.shopify_attributes }}
         >
           <div class="slider__image-wrapper">
-            {%- if block.settings.image != blank -%}
-              {%- liquid
-                assign image = block.settings.image
-                assign image_height = slide_height | times: 2
-                assign widths = '375, 550, 750, 1100, 1500, 1780, 2000, 2400'
-              -%}
+            {%- liquid
+              assign desktop_image = block.settings.image
+              assign mobile_image = block.settings.mobile_image | default: desktop_image
+              assign desktop_widths = '750, 1100, 1500, 1780, 2000, 2400'
+              assign mobile_widths = '375, 550, 750'
+            -%}
+
+            {%- if mobile_image != blank -%}
               {{
-                image
-                | image_url: width: 2400
+                mobile_image
+                | image_url: width: 750
                 | image_tag:
-                  widths: widths,
+                  widths: mobile_widths,
                   sizes: '100vw',
                   loading: 'lazy',
                   fetchpriority: 'low',
-                  class: 'slider__image'
+                  class: 'slider__image slider__image--mobile'
               }}
             {%- else -%}
-              {{ 'lifestyle-1' | placeholder_svg_tag: 'slider__image placeholder' }}
+              {{ 'lifestyle-1' | placeholder_svg_tag: 'slider__image slider__image--mobile placeholder' }}
             {%- endif -%}
+
+            {%- if desktop_image != blank -%}
+              {{
+                desktop_image
+                | image_url: width: 2400
+                | image_tag:
+                  widths: desktop_widths,
+                  sizes: '100vw',
+                  loading: 'lazy',
+                  fetchpriority: 'low',
+                  class: 'slider__image slider__image--desktop'
+              }}
+            {%- else -%}
+              {{ 'lifestyle-1' | placeholder_svg_tag: 'slider__image slider__image--desktop placeholder' }}
+            {%- endif -%}
+
             <div class="slider__overlay"></div>
           </div>
 
@@ -759,7 +795,13 @@
         {
           "type": "image_picker",
           "id": "image",
-          "label": "Image"
+          "label": "Desktop image"
+        },
+        {
+          "type": "image_picker",
+          "id": "mobile_image",
+          "label": "Mobile image",
+          "info": "Optional. Uses desktop image if not set."
         },
         {
           "type": "text",

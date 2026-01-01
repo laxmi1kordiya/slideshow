@@ -96,9 +96,54 @@
           {%- if show_dynamic_checkout -%}
             {{ form | payment_button }}
           {%- endif -%}
+
+          {%- comment -%} Notify Me Button - Shows when product is out of stock {%- endcomment -%}
+          {%- liquid
+            assign is_sold_out = false
+            if product.selected_or_first_available_variant.available == false or quantity_rule_soldout
+              assign is_sold_out = true
+            endif
+          -%}
+          {%- if is_sold_out -%}
+            <button
+              type="button"
+              class="product-form__notify button button--full-width button--primary"
+              data-notify-trigger
+              data-variant-id="{{ product.selected_or_first_available_variant.id }}"
+              data-variant-title="{{ product.selected_or_first_available_variant.title | escape }}"
+              onclick="openNotifyPopup('{{ product.selected_or_first_available_variant.id }}', '{{ product.selected_or_first_available_variant.title | escape }}')"
+            >
+              <span class="notify-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                </svg>
+              </span>
+              <span>{{ 'products.product.notify_me' | t | default: 'Notify Me When Available' }}</span>
+            </button>
+
+            <style>
+              .product-form__notify {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.5rem;
+                margin-top: 0.75rem;
+              }
+              .product-form__notify .notify-icon {
+                display: flex;
+                align-items: center;
+              }
+            </style>
+          {%- endif -%}
         </div>
       {%- endform -%}
     </product-form>
+
+    {%- comment -%} Include Notify Me Popup {%- endcomment -%}
+    {%- if is_sold_out -%}
+      {%- render 'notify-me-popup', product: product, variant: product.selected_or_first_available_variant -%}
+    {%- endif -%}
   {%- else -%}
     <div class="product-form">
       <div class="product-form__buttons form">

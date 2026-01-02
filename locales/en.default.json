@@ -107,6 +107,12 @@
   "products": {
     "product": {
       "add_to_cart": "Add to cart",
+      "notify_me": "Notify Me When Available",
+      "notify_description": "Enter your email below and we'll notify you as soon as this product is back in stock.",
+      "notify_button": "Notify Me",
+      "notify_success_title": "You're on the list!",
+      "notify_success_message": "We'll email you when this item is back in stock.",
+      "notify_privacy": "We'll only use your email to notify you about this product.",
       "choose_options": "Choose options",
       "choose_product_options": "Choose options for {{ product_name }}",
       "description": "Description",

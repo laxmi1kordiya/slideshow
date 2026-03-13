@@ -24,11 +24,8 @@
       {{ current_tags.first }}
   {% assign tag_slug = current_tags.first | handleize %}
   {% assign lookup_handle = collection.handle | append: '--' | append: tag_slug %}
-  {{ lookup_handle }}
   {% assign tag_seo = shop.metaobjects.extra_collection[lookup_handle] %}
-   {{ tag_seo | json }}
    {% endif %}
-
     <title>
       {{- page_title -}}
 

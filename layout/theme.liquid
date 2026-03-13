@@ -2,6 +2,7 @@
 <html class="no-js no-touch" lang="{{ request.locale.iso_code }}">
   
   <head>
+ {%- render 'ecom_header' -%}
 
 
 	{% render 'pandectes-rules' %}
@@ -16,6 +17,15 @@
 
     {%- render 'hs-critical-css' -%}
 
+      {{ request.path }} 
+    {% assign tag_seo = shop.metaobjects.extra_collection.['14-k-gold-jewellery'] %}
+    {{ tag_seo | json }}
+    {% comment %} {% if current_tags.size == 1 %}
+      {{ current_tags.first }}
+  {% assign tag_slug = current_tags.first | handleize %}
+  {% assign lookup_handle = collection.handle | append: '--' | append: tag_slug %}
+  {% assign tag_seo = shop.metaobjects.extra_collection[lookup_handle] %}
+   {% endif %} {% endcomment %}
     <title>
       {{- page_title -}}
 
@@ -1011,5 +1021,5 @@ document.documentElement.style.setProperty(
 );
 </script>
 
-        </body>  
+        {%- render "ecom_footer"-%}</body>  
 </html>

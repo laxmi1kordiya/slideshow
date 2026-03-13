@@ -1,15 +1,13 @@
 {
   "sections": {
     "main": {
-      "type": "main-blog",
+      "type": "static-blog",
       "settings": {
-        "layout": "collage",
-        "show_image": true,
-        "image_height": "medium",
+        "show_rss_link": true,
         "show_date": true,
         "show_author": false,
-        "padding_top": 36,
-        "padding_bottom": 36
+        "show_excerpt": true,
+        "posts_per_page_range": 9
       }
     }
   },

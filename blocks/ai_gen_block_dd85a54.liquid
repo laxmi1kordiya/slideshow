@@ -1,0 +1,293 @@
+{% doc %}
+  @prompt
+    Announcement bar, that slides review and free shipping message from left to right, the message have to move from right to left and to left and the time is 5 sec gap, At a time one message should be there in centre, first the review message hold and in 5 sec, that message just move to left fast and shipment message will come and later 5 sec this moves to left fast and then review message, Remove the icon, i will add my self the truck and star
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-announcement-bar-{{ ai_gen_id }} {
+    width: 100%;
+    background-color: {{ block.settings.background_color }};
+    color: {{ block.settings.text_color }};
+    overflow: hidden;
+    position: relative;
+    display: block;
+  }
+
+  .ai-announcement-bar__wrapper-{{ ai_gen_id }} {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: {{ block.settings.bar_height }}px;
+    padding: 10px 20px;
+    position: relative;
+  }
+
+  .ai-announcement-bar__track-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-announcement-bar__slide-{{ ai_gen_id }} {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: {{ block.settings.font_size }}px;
+    white-space: nowrap;
+    width: 100%;
+    opacity: 0;
+    transform: translateX(100%);
+  }
+
+  .ai-announcement-bar__slide-{{ ai_gen_id }}.active {
+    animation: ai-announcement-slide-in-{{ ai_gen_id }} 0.5s ease-out forwards;
+  }
+
+  .ai-announcement-bar__slide-{{ ai_gen_id }}.exit {
+    animation: ai-announcement-slide-out-{{ ai_gen_id }} 0.5s ease-in forwards;
+  }
+
+  .ai-announcement-bar__text-{{ ai_gen_id }} {
+    margin: 0;
+    display: inline;
+  }
+
+  .ai-announcement-bar__link-{{ ai_gen_id }} {
+    color: {{ block.settings.text_color }};
+    text-decoration: underline;
+    margin-left: 5px;
+  }
+
+  .ai-announcement-bar__link-{{ ai_gen_id }}:hover {
+    opacity: 0.8;
+  }
+
+  @keyframes ai-announcement-slide-in-{{ ai_gen_id }} {
+    0% {
+      opacity: 0;
+      transform: translateX(100%);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes ai-announcement-slide-out-{{ ai_gen_id }} {
+    0% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    100% {
+      opacity: 0;
+      transform: translateX(-100%);
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-announcement-bar__slide-{{ ai_gen_id }} {
+      font-size: {{ block.settings.font_size | times: 0.9 }}px;
+    }
+  }
+{% endstyle %}
+
+<announcement-bar-{{ ai_gen_id }} class="ai-announcement-bar-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-announcement-bar__wrapper-{{ ai_gen_id }}">
+    <div class="ai-announcement-bar__track-{{ ai_gen_id }}">
+      <div class="ai-announcement-bar__slide-{{ ai_gen_id }}" data-slide="0">
+        <p class="ai-announcement-bar__text-{{ ai_gen_id }}">
+          {{ block.settings.review_text }}
+          {% if block.settings.review_link != blank %}
+            <a href="{{ block.settings.review_link }}" class="ai-announcement-bar__link-{{ ai_gen_id }}">{{ block.settings.review_link_text }}</a>
+          {% endif %}
+        </p>
+      </div>
+
+      <div class="ai-announcement-bar__slide-{{ ai_gen_id }}" data-slide="1">
+        <p class="ai-announcement-bar__text-{{ ai_gen_id }}">
+          {{ block.settings.shipping_text }}
+          {% if block.settings.shipping_link != blank %}
+            <a href="{{ block.settings.shipping_link }}" class="ai-announcement-bar__link-{{ ai_gen_id }}">{{ block.settings.shipping_link_text }}</a>
+          {% endif %}
+        </p>
+      </div>
+    </div>
+  </div>
+</announcement-bar-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class AnnouncementBar{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.currentIndex = 0;
+        this.slides = [];
+        this.interval = null;
+      }
+
+      connectedCallback() {
+        this.slides = Array.from(this.querySelectorAll('.ai-announcement-bar__slide-{{ ai_gen_id }}'));
+        this.startRotation();
+      }
+
+      disconnectedCallback() {
+        if (this.interval) {
+          clearInterval(this.interval);
+        }
+      }
+
+      startRotation() {
+        this.showSlide(this.currentIndex);
+        
+        this.interval = setInterval(() => {
+          this.nextSlide();
+        }, {{ block.settings.hold_duration | times: 1000 }});
+      }
+
+      showSlide(index) {
+        this.slides.forEach((slide, i) => {
+          slide.classList.remove('active', 'exit');
+          if (i === index) {
+            slide.classList.add('active');
+          }
+        });
+      }
+
+      nextSlide() {
+        const currentSlide = this.slides[this.currentIndex];
+        currentSlide.classList.remove('active');
+        currentSlide.classList.add('exit');
+
+        this.currentIndex = (this.currentIndex + 1) % this.slides.length;
+
+        setTimeout(() => {
+          currentSlide.classList.remove('exit');
+          this.showSlide(this.currentIndex);
+        }, 500);
+      }
+    }
+
+    customElements.define('announcement-bar-{{ ai_gen_id }}', AnnouncementBar{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Announcement bar",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Review message"
+    },
+    {
+      "type": "text",
+      "id": "review_text",
+      "label": "Review text",
+      "default": "Rated 5 stars by our customers"
+    },
+    {
+      "type": "url",
+      "id": "review_link",
+      "label": "Review link"
+    },
+    {
+      "type": "text",
+      "id": "review_link_text",
+      "label": "Review link text",
+      "default": "Read reviews"
+    },
+    {
+      "type": "header",
+      "content": "Shipping message"
+    },
+    {
+      "type": "text",
+      "id": "shipping_text",
+      "label": "Shipping text",
+      "default": "Free shipping on orders over £20"
+    },
+    {
+      "type": "url",
+      "id": "shipping_link",
+      "label": "Shipping link"
+    },
+    {
+      "type": "text",
+      "id": "shipping_link_text",
+      "label": "Shipping link text",
+      "default": "Learn more"
+    },
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "bar_height",
+      "min": 40,
+      "max": 80,
+      "step": 5,
+      "unit": "px",
+      "label": "Bar height",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Font size",
+      "default": 14
+    },
+    {
+      "type": "header",
+      "content": "Animation"
+    },
+    {
+      "type": "range",
+      "id": "hold_duration",
+      "min": 3,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "label": "Hold duration",
+      "default": 5
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    }
+  ],
+  "presets": [
+    {
+      "name": "Announcement bar"
+    }
+  ]
+}
+{% endschema %}

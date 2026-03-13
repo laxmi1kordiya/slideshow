@@ -1,14 +1,1 @@
-{
-  "sections": {
-    "main": {
-      "type": "main-page",
-      "settings": {
-        "padding_top": 28,
-        "padding_bottom": 28
-      }
-    }
-  },
-  "order": [
-    "main"
-  ]
-}
+{"sections":{"main":{"type":"page","disabled":true,"settings":{}},"1764055650bdfe3ecf":{"type":"apps","blocks":{"clay_b2b_wholesale_clay_registration_form_QgAiYP":{"type":"shopify:\/\/apps\/clay-b2b-wholesale\/blocks\/clay-registration-form\/e89e496b-328b-4767-a3bb-2ff0d4065819","settings":{"registration_form_id":"4a43e833-b1f9-406d-97b5-75c8c7da778c"}}},"block_order":["clay_b2b_wholesale_clay_registration_form_QgAiYP"],"settings":{"include_padding":true}}},"order":["main","1764055650bdfe3ecf"]}

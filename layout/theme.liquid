@@ -1,431 +1,1015 @@
-{% include 'shogun-content-handler' %}
 <!doctype html>
-<html class="js" lang="{{ request.locale.iso_code }}">
+<html class="no-js no-touch" lang="{{ request.locale.iso_code }}">
+  
   <head>
- {%- render 'ecom_header' -%}
+
+
+	{% render 'pandectes-rules' %}
+	
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="theme-color" content="">
-    <link rel="canonical" href="{{ canonical_url }}">
+    <meta http-equiv="x-ua-compatible" content="IE=edge">
 
-    {%- if settings.favicon != blank -%}
-      <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 32, height: 32 }}">
-    {%- endif -%}
+    <link rel="preconnect" href="https://cdn.shopify.com">
+    <link rel="preconnect" href="https://fonts.shopifycdn.com">
+    <link rel="preconnect" href="https://v.shopify.com">
+    <link rel="preconnect" href="https://cdn.shopifycloud.com">
 
-    {%- unless settings.type_header_font.system? and settings.type_body_font.system? -%}
-      <link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
-    {%- endunless -%}
+    {%- render 'hs-critical-css' -%}
 
     <title>
-      {{ page_title }}
-      {%- if current_tags %} &ndash; tagged "{{ current_tags | join: ', ' }}"{% endif -%}
-      {%- if current_page != 1 %} &ndash; Page {{ current_page }}{% endif -%}
-      {%- unless page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless -%}
+      {{- page_title -}}
+
+      {%- if current_tags -%}
+        {% capture cat_array %}{%- render 'advanced-tag-loop' -%}{% endcapture %}
+        {% assign cat_array = cat_array | split: '|' %}
+        {% assign title_tags = '' %}
+        {% assign meta_tags = current_tags | join: ', ' %}
+        {%- for tag in current_tags -%}
+          {% assign is_advanced_tag = false %}
+          {% assign cat = tag | split: '_' | first %}
+
+          {%- unless cat == tag -%}
+            {%- if cat_array contains cat -%}
+              {% assign is_advanced_tag = true %}
+              {% assign title_tags = title_tags | append: ', ' | append: tag | replace_first: '_', ': ' %}
+            {%- endif -%}
+          {%- endunless -%}
+
+          {%- unless is_advanced_tag -%}
+            {% assign title_tags = title_tags | append: ', ' | append: tag %}
+          {%- endunless -%}
+        {%- endfor -%}
+        {{ 'general.title.tags' | t: tags: title_tags | remove_first: ', ' }}
+      {%- endif -%}
+
+      {%- if current_page != 1 -%}
+        {{- 'general.title.page' | t: page: current_page -}}
+      {%- endif -%}
+
+      {%- unless page_title contains shop.name -%}
+        {{- 'general.title.shop' | t: shop: shop.name -}}
+      {%- endunless -%}
     </title>
 
-    {% if page_description %}
+    {% if page_description != blank %}
       <meta name="description" content="{{ page_description | escape }}">
     {% endif %}
 
-    {% render 'meta-tags' %}
+    {% if settings.favicon != blank %}
+      <link rel="shortcut icon" href="{{ settings.favicon | img_url: '32x32' }}" type="image/png">
+    {% endif %}
 
-    <script src="{{ 'constants.js' | asset_url }}" defer="defer"></script>
-    <script src="{{ 'pubsub.js' | asset_url }}" defer="defer"></script>
-    <script src="{{ 'global.js' | asset_url }}" defer="defer"></script>
-    <script src="{{ 'details-disclosure.js' | asset_url }}" defer="defer"></script>
-    <script src="{{ 'details-modal.js' | asset_url }}" defer="defer"></script>
-    <script src="{{ 'search-form.js' | asset_url }}" defer="defer"></script>
+    {% if template contains 'collection' and current_tags %}
+      <meta name="robots" content="noindex" />
+      <link rel="canonical" href="{{ shop.url }}{{ collection.url }}" />
+    {% else %}
+      <link rel="canonical" href="{{ canonical_url }}" />
+    {% endif %}
 
-    {%- if settings.animations_reveal_on_scroll -%}
-      <script src="{{ 'animations.js' | asset_url }}" defer="defer"></script>
-    {%- endif -%}
+    <meta name="viewport" content="width=device-width">
+
+    {% assign x_handle = settings.social_x | split: 'x.com/' | last | split: 'twitter.com/' | last %}
+    {%
+      render 'social-meta-tags',
+      twitter_handle: x_handle,
+    %}
+
+
+    <link href="{{ 'theme.css' | asset_url }}" rel="stylesheet" type="text/css" media="all" />
+
+    {{ 'custom.css' | asset_url | stylesheet_tag }}
+
 
     {{ content_for_header }}
 
-    {%- liquid
-      assign body_font_bold = settings.type_body_font | font_modify: 'weight', 'bold'
-      assign body_font_italic = settings.type_body_font | font_modify: 'style', 'italic'
-      assign body_font_bold_italic = body_font_bold | font_modify: 'style', 'italic'
-    %}
+    {{ 'theme.css' | asset_url | stylesheet_tag }}
 
-    {% style %}
-      {{ settings.type_body_font | font_face: font_display: 'swap' }}
-      {{ body_font_bold | font_face: font_display: 'swap' }}
-      {{ body_font_italic | font_face: font_display: 'swap' }}
-      {{ body_font_bold_italic | font_face: font_display: 'swap' }}
-      {{ settings.type_header_font | font_face: font_display: 'swap' }}
+    {% unless settings.reduce_animations %}
+      {{ 'ripple.css' | asset_url | stylesheet_tag }}
+    {% endunless %}
+{{ 'cart-drawer.css' | asset_url | stylesheet_tag }}
 
-      {% for scheme in settings.color_schemes -%}
-        {% assign scheme_classes = scheme_classes | append: ', .color-' | append: scheme.id %}
-        {% if forloop.index == 1 -%}
-          :root,
-        {%- endif %}
-        .color-{{ scheme.id }} {
-          --color-background: {{ scheme.settings.background.red }},{{ scheme.settings.background.green }},{{ scheme.settings.background.blue }};
-        {% if scheme.settings.background_gradient != empty %}
-          --gradient-background: {{ scheme.settings.background_gradient }};
-        {% else %}
-          --gradient-background: {{ scheme.settings.background }};
-        {% endif %}
-
-        {% liquid
-          assign background_color = scheme.settings.background
-          assign background_color_brightness = background_color | color_brightness
-          if background_color_brightness <= 26
-            assign background_color_contrast = background_color | color_lighten: 50
-          elsif background_color_brightness <= 65
-            assign background_color_contrast = background_color | color_lighten: 5
-          else
-            assign background_color_contrast = background_color | color_darken: 25
-          endif
-        %}
-
-        --color-foreground: {{ scheme.settings.text.red }},{{ scheme.settings.text.green }},{{ scheme.settings.text.blue }};
-        --color-background-contrast: {{ background_color_contrast.red }},{{ background_color_contrast.green }},{{ background_color_contrast.blue }};
-        --color-shadow: {{ scheme.settings.shadow.red }},{{ scheme.settings.shadow.green }},{{ scheme.settings.shadow.blue }};
-        --color-button: {{ scheme.settings.button.red }},{{ scheme.settings.button.green }},{{ scheme.settings.button.blue }};
-        --color-button-text: {{ scheme.settings.button_label.red }},{{ scheme.settings.button_label.green }},{{ scheme.settings.button_label.blue }};
-        --color-secondary-button: {{ scheme.settings.background.red }},{{ scheme.settings.background.green }},{{ scheme.settings.background.blue }};
-        --color-secondary-button-text: {{ scheme.settings.secondary_button_label.red }},{{ scheme.settings.secondary_button_label.green }},{{ scheme.settings.secondary_button_label.blue }};
-        --color-link: {{ scheme.settings.secondary_button_label.red }},{{ scheme.settings.secondary_button_label.green }},{{ scheme.settings.secondary_button_label.blue }};
-        --color-badge-foreground: {{ scheme.settings.text.red }},{{ scheme.settings.text.green }},{{ scheme.settings.text.blue }};
-        --color-badge-background: {{ scheme.settings.background.red }},{{ scheme.settings.background.green }},{{ scheme.settings.background.blue }};
-        --color-badge-border: {{ scheme.settings.text.red }},{{ scheme.settings.text.green }},{{ scheme.settings.text.blue }};
-        --payment-terms-background-color: rgb({{ scheme.settings.background.rgb }});
-      }
-      {% endfor %}
-
-      {{ scheme_classes | prepend: 'body' }} {
-        color: rgba(var(--color-foreground), 0.75);
-        background-color: rgb(var(--color-background));
-      }
-
-      :root {
-        --font-body-family: {{ settings.type_body_font.family }}, {{ settings.type_body_font.fallback_families }};
-        --font-body-style: {{ settings.type_body_font.style }};
-        --font-body-weight: {{ settings.type_body_font.weight }};
-        --font-body-weight-bold: {{ settings.type_body_font.weight | plus: 300 | at_most: 1000 }};
-
-        --font-heading-family: {{ settings.type_header_font.family }}, {{ settings.type_header_font.fallback_families }};
-        --font-heading-style: {{ settings.type_header_font.style }};
-        --font-heading-weight: {{ settings.type_header_font.weight }};
-
-        --font-body-scale: {{ settings.body_scale | divided_by: 100.0 }};
-        --font-heading-scale: {{ settings.heading_scale | times: 1.0 | divided_by: settings.body_scale }};
-
-        --media-padding: {{ settings.media_padding }}px;
-        --media-border-opacity: {{ settings.media_border_opacity | divided_by: 100.0 }};
-        --media-border-width: {{ settings.media_border_thickness }}px;
-        --media-radius: {{ settings.media_radius }}px;
-        --media-shadow-opacity: {{ settings.media_shadow_opacity | divided_by: 100.0 }};
-        --media-shadow-horizontal-offset: {{ settings.media_shadow_horizontal_offset }}px;
-        --media-shadow-vertical-offset: {{ settings.media_shadow_vertical_offset }}px;
-        --media-shadow-blur-radius: {{ settings.media_shadow_blur }}px;
-        --media-shadow-visible: {% if settings.media_shadow_opacity > 0 %}1{% else %}0{% endif %};
-
-        --page-width: {{ settings.page_width | divided_by: 10 }}rem;
-        --page-width-margin: {% if settings.page_width == '1600' %}2{% else %}0{% endif %}rem;
-
-        --product-card-image-padding: {{ settings.card_image_padding | divided_by: 10.0 }}rem;
-        --product-card-corner-radius: {{ settings.card_corner_radius | divided_by: 10.0 }}rem;
-        --product-card-text-alignment: {{ settings.card_text_alignment }};
-        --product-card-border-width: {{ settings.card_border_thickness | divided_by: 10.0 }}rem;
-        --product-card-border-opacity: {{ settings.card_border_opacity | divided_by: 100.0 }};
-        --product-card-shadow-opacity: {{ settings.card_shadow_opacity | divided_by: 100.0 }};
-        --product-card-shadow-visible: {% if settings.card_shadow_opacity > 0 %}1{% else %}0{% endif %};
-        --product-card-shadow-horizontal-offset: {{ settings.card_shadow_horizontal_offset | divided_by: 10.0 }}rem;
-        --product-card-shadow-vertical-offset: {{ settings.card_shadow_vertical_offset | divided_by: 10.0 }}rem;
-        --product-card-shadow-blur-radius: {{ settings.card_shadow_blur | divided_by: 10.0 }}rem;
-
-        --collection-card-image-padding: {{ settings.collection_card_image_padding | divided_by: 10.0 }}rem;
-        --collection-card-corner-radius: {{ settings.collection_card_corner_radius | divided_by: 10.0 }}rem;
-        --collection-card-text-alignment: {{ settings.collection_card_text_alignment }};
-        --collection-card-border-width: {{ settings.collection_card_border_thickness | divided_by: 10.0 }}rem;
-        --collection-card-border-opacity: {{ settings.collection_card_border_opacity | divided_by: 100.0 }};
-        --collection-card-shadow-opacity: {{ settings.collection_card_shadow_opacity | divided_by: 100.0 }};
-        --collection-card-shadow-visible: {% if settings.collection_card_shadow_opacity > 0 %}1{% else %}0{% endif %};
-        --collection-card-shadow-horizontal-offset: {{ settings.collection_card_shadow_horizontal_offset | divided_by: 10.0 }}rem;
-        --collection-card-shadow-vertical-offset: {{ settings.collection_card_shadow_vertical_offset | divided_by: 10.0 }}rem;
-        --collection-card-shadow-blur-radius: {{ settings.collection_card_shadow_blur | divided_by: 10.0 }}rem;
-
-        --blog-card-image-padding: {{ settings.blog_card_image_padding | divided_by: 10.0 }}rem;
-        --blog-card-corner-radius: {{ settings.blog_card_corner_radius | divided_by: 10.0 }}rem;
-        --blog-card-text-alignment: {{ settings.blog_card_text_alignment }};
-        --blog-card-border-width: {{ settings.blog_card_border_thickness | divided_by: 10.0 }}rem;
-        --blog-card-border-opacity: {{ settings.blog_card_border_opacity | divided_by: 100.0 }};
-        --blog-card-shadow-opacity: {{ settings.blog_card_shadow_opacity | divided_by: 100.0 }};
-        --blog-card-shadow-visible: {% if settings.blog_card_shadow_opacity > 0 %}1{% else %}0{% endif %};
-        --blog-card-shadow-horizontal-offset: {{ settings.blog_card_shadow_horizontal_offset | divided_by: 10.0 }}rem;
-        --blog-card-shadow-vertical-offset: {{ settings.blog_card_shadow_vertical_offset | divided_by: 10.0 }}rem;
-        --blog-card-shadow-blur-radius: {{ settings.blog_card_shadow_blur | divided_by: 10.0 }}rem;
-
-        --badge-corner-radius: {{ settings.badge_corner_radius | divided_by: 10.0 }}rem;
-
-        --popup-border-width: {{ settings.popup_border_thickness }}px;
-        --popup-border-opacity: {{ settings.popup_border_opacity | divided_by: 100.0 }};
-        --popup-corner-radius: {{ settings.popup_corner_radius }}px;
-        --popup-shadow-opacity: {{ settings.popup_shadow_opacity | divided_by: 100.0 }};
-        --popup-shadow-horizontal-offset: {{ settings.popup_shadow_horizontal_offset }}px;
-        --popup-shadow-vertical-offset: {{ settings.popup_shadow_vertical_offset }}px;
-        --popup-shadow-blur-radius: {{ settings.popup_shadow_blur }}px;
-
-        --drawer-border-width: {{ settings.drawer_border_thickness }}px;
-        --drawer-border-opacity: {{ settings.drawer_border_opacity | divided_by: 100.0 }};
-        --drawer-shadow-opacity: {{ settings.drawer_shadow_opacity | divided_by: 100.0 }};
-        --drawer-shadow-horizontal-offset: {{ settings.drawer_shadow_horizontal_offset }}px;
-        --drawer-shadow-vertical-offset: {{ settings.drawer_shadow_vertical_offset }}px;
-        --drawer-shadow-blur-radius: {{ settings.drawer_shadow_blur }}px;
-
-        --spacing-sections-desktop: {{ settings.spacing_sections }}px;
-        --spacing-sections-mobile: {% if settings.spacing_sections < 24 %}{{ settings.spacing_sections }}{% else %}{{ settings.spacing_sections | times: 0.7 | round | at_least: 20 }}{% endif %}px;
-
-        --grid-desktop-vertical-spacing: {{ settings.spacing_grid_vertical }}px;
-        --grid-desktop-horizontal-spacing: {{ settings.spacing_grid_horizontal }}px;
-        --grid-mobile-vertical-spacing: {{ settings.spacing_grid_vertical | divided_by: 2 }}px;
-        --grid-mobile-horizontal-spacing: {{ settings.spacing_grid_horizontal | divided_by: 2 }}px;
-
-        --text-boxes-border-opacity: {{ settings.text_boxes_border_opacity | divided_by: 100.0 }};
-        --text-boxes-border-width: {{ settings.text_boxes_border_thickness }}px;
-        --text-boxes-radius: {{ settings.text_boxes_radius }}px;
-        --text-boxes-shadow-opacity: {{ settings.text_boxes_shadow_opacity | divided_by: 100.0 }};
-        --text-boxes-shadow-visible: {% if settings.text_boxes_shadow_opacity > 0 %}1{% else %}0{% endif %};
-        --text-boxes-shadow-horizontal-offset: {{ settings.text_boxes_shadow_horizontal_offset }}px;
-        --text-boxes-shadow-vertical-offset: {{ settings.text_boxes_shadow_vertical_offset }}px;
-        --text-boxes-shadow-blur-radius: {{ settings.text_boxes_shadow_blur }}px;
-
-        --buttons-radius: {{ settings.buttons_radius }}px;
-        --buttons-radius-outset: {% if settings.buttons_radius > 0 %}{{ settings.buttons_radius | plus: settings.buttons_border_thickness }}{% else %}0{% endif %}px;
-        --buttons-border-width: {% if settings.buttons_border_opacity > 0 %}{{ settings.buttons_border_thickness }}{% else %}0{% endif %}px;
-        --buttons-border-opacity: {{ settings.buttons_border_opacity | divided_by: 100.0 }};
-        --buttons-shadow-opacity: {{ settings.buttons_shadow_opacity | divided_by: 100.0 }};
-        --buttons-shadow-visible: {% if settings.buttons_shadow_opacity > 0 %}1{% else %}0{% endif %};
-        --buttons-shadow-horizontal-offset: {{ settings.buttons_shadow_horizontal_offset }}px;
-        --buttons-shadow-vertical-offset: {{ settings.buttons_shadow_vertical_offset }}px;
-        --buttons-shadow-blur-radius: {{ settings.buttons_shadow_blur }}px;
-        --buttons-border-offset: {% if settings.buttons_radius > 0 or settings.buttons_shadow_opacity > 0 %}0.3{% else %}0{% endif %}px;
-
-        --inputs-radius: {{ settings.inputs_radius }}px;
-        --inputs-border-width: {{ settings.inputs_border_thickness }}px;
-        --inputs-border-opacity: {{ settings.inputs_border_opacity | divided_by: 100.0 }};
-        --inputs-shadow-opacity: {{ settings.inputs_shadow_opacity | divided_by: 100.0 }};
-        --inputs-shadow-horizontal-offset: {{ settings.inputs_shadow_horizontal_offset }}px;
-        --inputs-margin-offset: {% if settings.inputs_shadow_vertical_offset != 0 and settings.inputs_shadow_opacity > 0 %}{{ settings.inputs_shadow_vertical_offset | abs }}{% else %}0{% endif %}px;
-        --inputs-shadow-vertical-offset: {{ settings.inputs_shadow_vertical_offset }}px;
-        --inputs-shadow-blur-radius: {{ settings.inputs_shadow_blur }}px;
-        --inputs-radius-outset: {% if settings.inputs_radius > 0 %}{{ settings.inputs_radius | plus: settings.inputs_border_thickness }}{% else %}0{% endif %}px;
-
-        --variant-pills-radius: {{ settings.variant_pills_radius }}px;
-        --variant-pills-border-width: {{ settings.variant_pills_border_thickness }}px;
-        --variant-pills-border-opacity: {{ settings.variant_pills_border_opacity | divided_by: 100.0 }};
-        --variant-pills-shadow-opacity: {{ settings.variant_pills_shadow_opacity | divided_by: 100.0 }};
-        --variant-pills-shadow-horizontal-offset: {{ settings.variant_pills_shadow_horizontal_offset }}px;
-        --variant-pills-shadow-vertical-offset: {{ settings.variant_pills_shadow_vertical_offset }}px;
-        --variant-pills-shadow-blur-radius: {{ settings.variant_pills_shadow_blur }}px;
-      }
-
-      *,
-      *::before,
-      *::after {
-        box-sizing: inherit;
-      }
-
-      html {
-        box-sizing: border-box;
-        font-size: calc(var(--font-body-scale) * 62.5%);
-        height: 100%;
-      }
-
-      body {
-        display: grid;
-        grid-template-rows: auto auto 1fr auto;
-        grid-template-columns: 100%;
-        min-height: 100%;
-        margin: 0;
-        font-size: 1.5rem;
-        letter-spacing: 0.06rem;
-        line-height: calc(1 + 0.8 / var(--font-body-scale));
-        font-family: var(--font-body-family);
-        font-style: var(--font-body-style);
-        font-weight: var(--font-body-weight);
-      }
-
-      @media screen and (min-width: 750px) {
-        body {
-          font-size: 1.6rem;
-        }
-      }
-    {% endstyle %}
-
-    {{ 'base.css' | asset_url | stylesheet_tag }}
-    <link rel="stylesheet" href="{{ 'component-cart-items.css' | asset_url }}" media="print" onload="this.media='all'">
-
-    {%- if settings.cart_type == 'drawer' -%}
-      {{ 'component-cart-drawer.css' | asset_url | stylesheet_tag }}
-      {{ 'component-cart.css' | asset_url | stylesheet_tag }}
-      {{ 'component-totals.css' | asset_url | stylesheet_tag }}
-      {{ 'component-price.css' | asset_url | stylesheet_tag }}
-      {{ 'component-discounts.css' | asset_url | stylesheet_tag }}
-    {%- endif -%}
-
-    {%- unless settings.type_body_font.system? -%}
-      {% comment %}theme-check-disable AssetPreload{% endcomment %}
-      <link rel="preload" as="font" href="{{ settings.type_body_font | font_url }}" type="font/woff2" crossorigin>
-      {% comment %}theme-check-enable AssetPreload{% endcomment %}
-    {%- endunless -%}
-    {%- unless settings.type_header_font.system? -%}
-      {% comment %}theme-check-disable AssetPreload{% endcomment %}
-      <link rel="preload" as="font" href="{{ settings.type_header_font | font_url }}" type="font/woff2" crossorigin>
-      {% comment %}theme-check-enable AssetPreload{% endcomment %}
-    {%- endunless -%}
-
-    {%- if localization.available_countries.size > 1 or localization.available_languages.size > 1 -%}
-      {{ 'component-localization-form.css' | asset_url | stylesheet_tag: preload: true }}
-      <script src="{{ 'localization-form.js' | asset_url }}" defer="defer"></script>
-    {%- endif -%}
-
-    {%- if settings.predictive_search_enabled -%}
-      <link
-        rel="stylesheet"
-        href="{{ 'component-predictive-search.css' | asset_url }}"
-        media="print"
-        onload="this.media='all'"
-      >
-    {%- endif -%}
-
+    {% comment %}Inject theme-object begin{% endcomment %}
     <script>
-      if (Shopify.designMode) {
-        document.documentElement.classList.add('shopify-design-mode');
-      }
+      window.Theme = window.Theme || {};
+      window.Theme.version = '12.0.0';
+      window.Theme.name = 'Empire';
+      window.Theme.routes = {
+        "root_url": "{{ routes.root_url }}",
+        "account_url": "{{ routes.account_url }}",
+        "account_login_url": "{{ routes.account_login_url }}",
+        "account_logout_url": "{{ routes.account_logout_url }}",
+        "account_register_url": "{{ routes.account_register_url }}",
+        "account_addresses_url": "{{ routes.account_addresses_url }}",
+        "collections_url": "{{ routes.collections_url }}",
+        "all_products_collection_url": "{{ routes.all_products_collection_url }}",
+        "search_url": "{{ routes.search_url }}",
+        "predictive_search_url": "{{ routes.predictive_search_url }}",
+        "cart_url": "{{ routes.cart_url }}",
+        "cart_add_url": "{{ routes.cart_add_url }}",
+        "cart_change_url": "{{ routes.cart_change_url }}",
+        "cart_clear_url": "{{ routes.cart_clear_url }}",
+        "product_recommendations_url": "{{ routes.product_recommendations_url }}",
+      };
     </script>
-  
-  {% render 'shogun-head' %}
+    {% comment %}Inject theme-object end{% endcomment %}
 
- {% comment %} Start Pricing by country {% endcomment %}  
-<style id="priceBlock">
-	 .product-grid .grid__item .price{
-		 visibility: hidden;
-	} 
-</style>
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-	 try {
-		 const targetNode = document.body;
-		 const config = { childList: true, subtree: true };
-		 const callback = function(mutationsList, observer) {
-		 var labels1 = document.querySelectorAll(".product-form__input");
-		 for (let i = 0; i < labels1.length; i++) {
-			 let ele = labels1[i];
-			 if (ele.innerHTML.toLowerCase().includes("currencycountry") && ele.style.display !== "none") {
-				 ele.style.display = "none";
-			 }
-		 }
-		};
-		 const observer = new MutationObserver(callback);
-		 observer.observe(targetNode, config);
-	 } catch (error) {
-		 console.log("Pricing by country -->", error);
-		 let ele = document.getElementById("priceBlock");
-		 if (ele) {
-			 ele.innerHTML = ".product-grid .grid__item .price{visibility: visible;}.product .price{visibility: visible;}";
-		 }
-	 }
-});
-</script>
+  </head>
 
+  <body class="template-{{ template.name }}" data-instant-allow-query-string {% if settings.reduce_animations %}data-reduce-animations{% endif %}>
     <script>
-      var wsShop = "{{shop.permanent_domain}}";
-      window.wscc_markets = [];
-      {% if localization.available_countries.size > 1 %}
-        window.wscc_markets = [];
-        {% for country in localization.available_countries %}
-          window.wscc_markets.push({
-            country_code: "{{ country.iso_code }}",
-            country: "{{ country.name }}",
-            currency_code: "{{ country.currency.iso_code }}",
-            symbol: "{{ country.currency.symbol }}"
-          });
-        {% endfor %}
-      {% endif %}
-    </script>	 <script defer type="text/javascript" src="https://pricing-by-country-api.webrexstudio.com/pricingbycountry.js?id=675fbd35572aee02c8353411" ></script> 
-{% comment %} End Pricing by country {% endcomment %}
-</head>
+      document.documentElement.className=document.documentElement.className.replace(/\bno-js\b/,'js');
+      if(window.Shopify&&window.Shopify.designMode)document.documentElement.className+=' in-theme-editor';
+      if(('ontouchstart' in window)||window.DocumentTouch&&document instanceof DocumentTouch)document.documentElement.className=document.documentElement.className.replace(/\bno-touch\b/,'has-touch');
+    </script>
 
-  <body class="gradient{% if settings.animations_hover_elements != 'none' %} animate--hover-{{ settings.animations_hover_elements }}{% endif %}">
-    <a class="skip-to-content-link button visually-hidden" href="#MainContent">
-      {{ 'accessibility.skip_to_text' | t }}
-    </a>
+    {% comment %}Inject icon-star-symbol begin{% endcomment %}
+    <svg
+      class="icon-star-reference"
+      aria-hidden="true"
+      focusable="false"
+      role="presentation"
+      xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="3 3 17 17" fill="none"
+    >
+      <symbol id="icon-star">
+        <rect class="icon-star-background" width="20" height="20" fill="currentColor"/>
+        <path d="M10 3L12.163 7.60778L17 8.35121L13.5 11.9359L14.326 17L10 14.6078L5.674 17L6.5 11.9359L3 8.35121L7.837 7.60778L10 3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </symbol>
+      <clipPath id="icon-star-clip">
+        <path d="M10 3L12.163 7.60778L17 8.35121L13.5 11.9359L14.326 17L10 14.6078L5.674 17L6.5 11.9359L3 8.35121L7.837 7.60778L10 3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </clipPath>
+    </svg>
+    {% comment %}Inject icon-star-symbol end{% endcomment %}
 
-    {%- if settings.cart_type == 'drawer' -%}
-      {%- render 'cart-drawer' -%}
-    {%- endif -%}
+
+    <a class="skip-to-main" href="#site-main">{{ 'general.accessibility.skip_to_content' | t }}</a>
 
     {% sections 'header-group' %}
 
-    <main id="MainContent" class="content-for-layout focus-none" role="main" tabindex="-1">
+    <div style="--background-color: {{ settings.color_background }}">
+      {%
+        render 'age-gate',
+        id: 'page',
+        sections: content_for_layout,
+      %}
+    </div>
+
+    <div class="intersection-target" data-header-intersection-target></div>
+    <div class="site-main-dimmer" data-site-main-dimmer></div>
+    <main id="site-main" class="site-main" aria-label="Main content" tabindex="-1">
       {{ content_for_layout }}
     </main>
 
+    {%- if settings.enable_back_to_top_button -%}
+      {%- render 'back-to-top-button' -%}
+    {%- endif -%}
+
     {% sections 'footer-group' %}
 
-    <ul hidden>
-      <li id="a11y-refresh-page-message">{{ 'accessibility.refresh_page' | t }}</li>
-      <li id="a11y-new-window-message">{{ 'accessibility.link_messages.new_window' | t }}</li>
-    </ul>
+    {% comment %}
+      Below are various templates used in JavaScript
+    {% endcomment %}
+    <div style="display: none;" aria-hidden="true" data-templates>
+      {% comment %}Inject message-banner begin{% endcomment %}
+      <div
+        class="message-banner--container"
+        role="alert"
+        data-message-banner
+      >
+        <div class="message-banner--outer">
+          <div class="message-banner--inner" data-message-banner-content></div>
+      
+          <button
+            class="message-banner--close"
+            type="button"
+            aria-label="{{ 'general.accessibility.close' | t }}"
+            data-message-banner-close
+          >
+            {%- render 'icon-menu-close' -%}
+          </button>
+        </div>
+      </div>
+      {% comment %}Inject message-banner end{% endcomment %}
+
+      {% comment %}Inject atc-banner begin{% endcomment %}
+      <section class="atc-banner--container" role="log" data-atc-banner>
+        <div class="atc-banner--outer">
+          <div class="atc-banner--inner">
+            <div class="atc-banner--product">
+              <h2 class="atc-banner--product-title">
+                <span class="atc-banner--product-title--icon">
+                  {%
+                    render 'icon-library',
+                    id: 'icon-checkmark',
+                  %}
+                </span>
+                {{ 'add_to_cart_banner.general.product_added' | t }}
+              </h2>
+      
+              <div class="atc--product">
+                <div class="atc--product-image" data-atc-banner-product-image>
+                  {{ 'image' | placeholder_svg_tag: 'placeholder--image' }}
+                </div>
+                <div class="atc--product-details">
+                  <h2 class="atc--product-details--title" data-atc-banner-product-title></h2>
+                  <span class="atc--product-details--options" data-atc-banner-product-options></span>
+                  <span class="atc--product-details--price">
+                    <span class="atc--product-details--price-quantity" data-atc-banner-product-price-quantity></span>
+                    <span class="atc--product-details--price-value money" data-atc-banner-product-price-value></span>
+                    <span class="atc--product-details--price-discounted money" data-atc-banner-product-price-discounted></span>
+                    <span class="atc--product-details--unit-price hidden" data-atc-banner-unit-price>
+                      {{ 'product.general.price_per_unit_html' | t: total_quantity: '** total_quantity **', unit_price: '** unit_price **', unit_measure: '** unit_measure **' }}
+                    </span>
+                  </span>
+                  <ul class="discount-list" data-atc-banner-product-discounts>
+                    <li class="discount-list-item">
+                      {% render 'icon-library', id: 'icon-sale-tag' %}
+                      <span class="discount-title"></span>
+                      (-<span class="money discount-amount"></span>)
+                    </li>
+                  </ul>
+                  <span class="atc--line-item-subscriptions" data-atc-banner-product-subscription-title></span>
+                </div>
+              </div>
+            </div>
+      
+            <div class="atc-banner--cart">
+              <div class="atc-banner--cart-subtotal">
+                <span class="atc-subtotal--label">
+                  {{ 'add_to_cart_banner.general.sub_total' | t }}
+                </span>
+                <span class="atc-subtotal--price money" data-atc-banner-cart-subtotal></span>
+              </div>
+      
+              {%-
+                render 'free-shipping-bar',
+                context: 'atc-banner',
+              -%}
+      
+              <footer class="atc-banner--cart-footer">
+              <a 
+  class="button-secondary atc-button--viewcart" 
+  href="#" 
+  data-atc-banner-cart-button
+  data-cart-open
+>
+  {{ 'add_to_cart_banner.general.view_cart_html' | t: count: '<span></span>' }}
+</a>
+            <form
+  class="atc-banner__form"
+  action="{{ routes.cart_url }}"
+  method="post"
+  aria-label="cart checkout"
+>
+                  <button class="button-primary atc-button--checkout" type="submit" name="checkout">
+                    {% if settings.enable_checkout_lock_icon %}
+                      {% render 'icon-checkout-lock' %}
+                    {% endif %}
+                    <span>{{ 'add_to_cart_banner.general.checkout' | t }}</span>
+                  </button>
+                </form>
+              </footer>
+            </div>
+          </div>
+      
+          <button
+            class="atc-banner--close"
+            type="button"
+            aria-label="{{ 'general.accessibility.close' | t }}"
+            data-atc-banner-close
+          >
+            {%- render 'icon-menu-close' -%}
+          </button>
+        </div>
+      </section>
+      {% comment %}Inject atc-banner end{% endcomment %}
+
+    </div>
+
+    {% comment %}
+      Modal container, used on Collections, Password, and QuickShop
+    {% endcomment %}
+    {% comment %}Inject modal begin{% endcomment %}
+    <div class="modal" data-modal-container aria-label="modal window" data-trap-focus>
+      <div class="modal-inner" data-modal-inner>
+        <button
+          class="modal-close"
+          type="button"
+          aria-label="{{ 'general.accessibility.close' | t }}"
+          data-modal-close
+        >
+          {% render 'icon-menu-close' %}
+        </button>
+        <div class="modal-content" data-modal-content></div>
+      </div>
+    </div>
+    
+    <div class="modal-1" data-modal-container-1 aria-label="modal window">
+      <div class="modal-inner" data-modal-inner>
+        <button
+          class="modal-close"
+          type="button"
+          aria-label="{{ 'general.accessibility.close' | t }}"
+          data-modal-1-close
+        >
+          {% render 'icon-menu-close' %}
+        </button>
+        <div class="modal-content" data-modal-content></div>
+      </div>
+    </div>
+    {% comment %}Inject modal end{% endcomment %}
+
+
+    {% comment %}
+      This is the PhotoSwipe dialog which needs to be in the base page
+    {% endcomment %}
+    {% comment %}Inject product-gallery-zoom begin{% endcomment %}
+    {% comment %} Root element of PhotoSwipe. Must have class pswp. {% endcomment %}
+    <div
+      class="pswp"
+      tabindex="-1"
+      role="dialog"
+      aria-hidden="true"
+      aria-label="{{ 'general.accessibility.product_zoom_dialog' | t }}"
+      data-photoswipe
+    >
+    
+      {% comment %} Background of PhotoSwipe.
+            It's a separate element as animating opacity is faster than rgba(). {% endcomment %}
+      <div class="pswp__bg"></div>
+    
+      {% comment %} Slides wrapper with overflow:hidden. {% endcomment %}
+      <div class="pswp__scroll-wrap">
+          {% comment %} Container that holds slides.
+              PhotoSwipe keeps only 3 of them in the DOM to save memory.
+              Don't modify these 3 pswp__item elements, data is added later on. {% endcomment %}
+          <div class="pswp__container" aria-hidden="true">
+              <div class="pswp__item"></div>
+              <div class="pswp__item"></div>
+              <div class="pswp__item"></div>
+          </div>
+    
+          {% comment %} Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. {% endcomment %}
+          <div class="pswp__ui pswp__ui--hidden">
+              <div class="pswp__top-bar">
+                  {% comment %}  Controls are self-explanatory. Order can be changed. {% endcomment %}
+                  <div class="pswp__counter"></div>
+                  <button class="pswp__button pswp__button--close" title="{{ 'general.accessibility.close' | t }}">
+                    <span tabindex="-1">
+                      {% render 'icon-library', id: 'icon-close' %}
+                    </span>
+                  </button>
+                  <button class="pswp__button pswp__button--share" title="Share"></button>
+                  <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                  <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+    
+                  {% comment %} Preloader demo https://codepen.io/dimsemenov/pen/yyBWoR {% endcomment %}
+                  {% comment %} element will get class pswp__preloader--active when preloader is running {% endcomment %}
+                  <div class="pswp__preloader">
+                      <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                          <div class="pswp__preloader__donut"></div>
+                        </div>
+                      </div>
+                  </div>
+              </div>
+    
+              <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                  <div class="pswp__share-tooltip"></div>
+              </div>
+    
+              <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+              </button>
+              <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+              </button>
+    
+              <div class="pswp__caption">
+                  <div class="pswp__caption__center"></div>
+              </div>
+          </div>
+      </div>
+      <div class="product-zoom--thumbnails" data-photoswipe-thumbs>
+        <button
+          class="gallery-navigation--scroll-button scroll-left"
+          aria-label="Scroll thumbnails left"
+          data-gallery-scroll-button
+        >
+          {% render 'icon-chevron-down' %}
+        </button>
+        <button
+          class="gallery-navigation--scroll-button scroll-right"
+          aria-label="Scroll thumbnails right"
+          data-gallery-scroll-button
+        >
+          {% render 'icon-chevron-down' %}
+        </button>
+        <div class="product-zoom--thumb-scroller" data-photoswipe-thumb-scroller></div>
+      </div>
+    </div>
+    {% comment %}Inject product-gallery-zoom end{% endcomment %}
+
+
+    {% comment %}
+      Product compare drawer, shown when products are compared
+    {% endcomment %}
+    {% comment %}Inject template-allows-compare begin{% endcomment %}
+    {% assign template_allows_compare = settings.enable_product_compare %}
+    {% if template.name == 'cart' %}
+      {% assign template_allows_compare = false %}
+    {% elsif template.name == 'product' and template.suffix contains 'compare' %}
+      {% assign template_allows_compare = false %}
+    {% endif %}
+    {% comment %}Inject template-allows-compare end{% endcomment %}
+
+    {% if template_allows_compare %}
+      {% comment %}Inject product-compare-drawer begin{% endcomment %}
+      <div class="product-compare-drawer" data-product-compare-drawer>
+        <div class="product-compare-drawer__header" data-product-compare-drawer-header>
+          <h2 class="product-compare-drawer__title" data-product-compare-drawer-title>
+            {{ 'product_compare.drawer_title' | t }}
+          </h2>
+      
+          <p
+            class="product-compare-drawer__notification"
+            data-product-count-one="{{ 'product_compare.drawer_notification.one' | t }}"
+            data-product-count-other="{{ 'product_compare.drawer_notification.other' | t: count: '** count **' }}"
+            data-product-compare-drawer-notification
+          >
+            {{ 'product_compare.drawer_notification' | t: count }}
+          </p>
+      
+          <span class="product-compare-drawer__trigger">
+            {% render 'icon-chevron-down' %}
+          </span>
+        </div>
+      
+        <div class="product-compare-drawer__container">
+          <div class="product-compare-drawer__items" data-compare-drawer-items-container>
+            <template data-product-compare-drawer-item-template>
+              <div
+                class="
+                  product-compare-drawer__item
+                  imagestyle--{% if settings.product_grid_image_crop and settings.product_grid_image_style != 'natural' %}cropped-{% endif %}{{ settings.product_grid_image_style }}
+                "
+              >
+                <div class="product-compare-drawer__image">
+                  <figure class="productitem--image" data-product-compare-drawer-image></figure>
+                </div>
+                <a class="product-compare-drawer__item-title" data-product-compare-drawer-title></a>
+                <button class="product-compare-drawer__remove" data-product-compare-drawer-remove>
+                  {%
+                    render 'icon-library',
+                    id: 'icon-remove',
+                    icon_class: 'product-compare-drawer__remove-icon',
+                  %}
+                </button>
+              </div>
+            </template>
+      
+            {% for i in (1..3) %}
+              <div class="product-compare-drawer__item-placeholder" data-product-compare-drawer-item-placeholder>
+                <p class="product-compare-drawer__item-placeholder-text">
+                  {% if forloop.index == 1 %}
+                    {{ 'product_compare.drawer_notification_placeholder.first' | t }}
+                  {% elsif forloop.index == 2 %}
+                    {{ 'product_compare.drawer_notification_placeholder.second' | t }}
+                  {% elsif forloop.index == 3 %}
+                    {{ 'product_compare.drawer_notification_placeholder.third' | t }}
+                  {% endif %}
+                </p>
+              </div>
+            {% endfor %}
+          </div>
+      
+          <div class="product-compare-drawer__actions">
+            <a
+              class="
+                product-compare-drawer__link
+                button-primary
+                disabled
+              "
+              href="{{ routes.root_url }}"
+              data-product-compare-drawer-link
+              data-product-compare-drawer-link-text="{{ 'product_compare.compare' | t }}"
+            >
+              {{ 'product_compare.compare' | t }}
+            </a>
+      
+            <button class="product-compare-drawer__clear-all" data-product-compare-clear-all>
+              {{ 'product_compare.drawer_clear_all' | t }}
+            </button>
+          </div>
+        </div>
+      </div>
+      {% comment %}Inject product-compare-drawer end{% endcomment %}
+
+    {% endif %}
+
+    {% if settings.enable_product_compare %}
+      {% comment %}Inject product-compare-breadcrumb-data begin{% endcomment %}
+      {% assign compare_breadcrumb_title = nil %}
+      
+      {% case request.page_type %}
+        {% when 'product' %}
+          {% assign compare_breadcrumb_title = product.title %}
+        {% when 'collection' %}
+          {% assign compare_breadcrumb_title = collection.title %}
+        {% when 'index' %}
+          {% assign compare_breadcrumb_title = 'general.breadcrumbs.home' | t %}
+        {% when 'search' %}
+          {% assign compare_breadcrumb_title = 'general.accessibility.search' | t %}
+      {% endcase %}
+      
+      {% assign compare_breadcrumb_update = true %}
+      
+      {% if template.name == 'product' and template.suffix contains 'compare' %}
+        {% assign compare_breadcrumb_update = false %}
+      {% endif %}
+      
+      <script type="application/json" data-product-compare-breadcrumb-data>
+        {
+          "title": {{ compare_breadcrumb_title | json }},
+          "update": {{ compare_breadcrumb_update }}
+        }
+      </script>
+      {% comment %}Inject product-compare-breadcrumb-data end{% endcomment %}
+
+    {% endif %}
+{%- render 'wishlisthero-styles' -%}
+    {%- if template contains 'customer' -%}
+      {{ 'shopify_common.js' | shopify_asset_url | script_tag }}
+      {{ 'customer_area.js' | shopify_asset_url | script_tag }}
+    {%- endif -%}
+
+    {% unless settings.reduce_animations %}
+      <script>
+        (
+          function () {
+            var classes = {
+              block: 'pxu-lia-block',
+              element: 'pxu-lia-element',
+            };
+
+            document
+              .querySelectorAll('[type="application/pxs-animation-mapping+json"]')
+              .forEach(function (mappingEl) {
+                const section = mappingEl.parentNode;
+                try {
+                  const mapping = JSON.parse(mappingEl.innerHTML);
+                  mapping.elements.forEach(function (elementSelector) {
+                    section
+                      .querySelectorAll(elementSelector)
+                      .forEach(function (element) { element.classList.add(classes.element); });
+                  });
+
+                  mapping.blocks.forEach(function (blockSelector) {
+                    section
+                      .querySelectorAll(blockSelector)
+                      .forEach(function (block) { block.classList.add(classes.block); });
+                  });
+                } catch (error) {
+                  console.warn('Unable to parse animation mapping', mappingEl, error);
+                }
+            });
+          }
+        )()
+      </script>
+    {% endunless %}
+
+    {%- if settings.minify_scripts -%}
+      <script
+        src="{{ 'empire.min.js' | asset_url }}"
+        data-scripts
+        data-shopify-api-url="{{ 'api.jquery.js' | shopify_asset_url }}"
+        data-shopify-countries="/services/javascripts/countries.js"
+        data-shopify-common="{{ 'shopify_common.js' | shopify_asset_url }}"
+        data-shopify-cart="{{ 'jquery.cart.js' | asset_url }}"
+        data-pxu-polyfills="{{ 'polyfills.min.js' | asset_url }}"
+        defer
+      ></script>
+    {%- else -%}
+      <script
+        src="{{ 'empire.js' | asset_url }}"
+        
+        data-scripts
+        data-shopify-api-url="{{ 'api.jquery.js' | shopify_asset_url }}"
+        data-shopify-countries="/services/javascripts/countries.js"
+        data-shopify-common="{{ 'shopify_common.js' | shopify_asset_url }}"
+        data-shopify-cart="{{ 'jquery.cart.js' | asset_url }}"
+        data-pxu-polyfills="{{ 'polyfills.min.js' | asset_url }}"
+        defer
+      ></script>
+      
+    {%- endif -%}
+    
+
+    {% render 'structured-data' %}
 
     <script>
-      window.shopUrl = '{{ request.origin }}';
-      window.routes = {
-        cart_add_url: '{{ routes.cart_add_url }}',
-        cart_change_url: '{{ routes.cart_change_url }}',
-        cart_update_url: '{{ routes.cart_update_url }}',
-        cart_url: '{{ routes.cart_url }}',
-        predictive_search_url: '{{ routes.predictive_search_url }}',
-      };
-
-      window.cartStrings = {
-        error: `{{ 'sections.cart.cart_error' | t }}`,
-        quantityError: `{{ 'sections.cart.cart_quantity_error_html' | t: quantity: '[quantity]' }}`,
-      };
-
-      window.variantStrings = {
-        addToCart: `{{ 'products.product.add_to_cart' | t }}`,
-        soldOut: `{{ 'products.product.sold_out' | t }}`,
-        unavailable: `{{ 'products.product.unavailable' | t }}`,
-        unavailable_with_option: `{{ 'products.product.value_unavailable' | t: option_value: '[value]' }}`,
-      };
-
-      window.quickOrderListStrings = {
-        itemsAdded: `{{ 'sections.quick_order_list.items_added.other' | t: quantity: '[quantity]' }}`,
-        itemAdded: `{{ 'sections.quick_order_list.items_added.one' | t: quantity: '[quantity]' }}`,
-        itemsRemoved: `{{ 'sections.quick_order_list.items_removed.other' | t: quantity: '[quantity]' }}`,
-        itemRemoved: `{{ 'sections.quick_order_list.items_removed.one' | t: quantity: '[quantity]' }}`,
-        viewCart: `{{- 'sections.quick_order_list.view_cart' | t -}}`,
-        each: `{{- 'sections.quick_order_list.each' | t: money: '[money]' }}`,
-        min_error: `{{- 'sections.quick_order_list.min_error' | t: min: '[min]' }}`,
-        max_error: `{{- 'sections.quick_order_list.max_error' | t: max: '[max]' }}`,
-        step_error: `{{- 'sections.quick_order_list.step_error' | t: step: '[step]' }}`,
-      };
-
-      window.accessibilityStrings = {
-        imageAvailable: `{{ 'products.product.media.image_available' | t: index: '[index]' }}`,
-        shareSuccess: `{{ 'general.share.success_message' | t }}`,
-        pauseSlideshow: `{{ 'sections.slideshow.pause_slideshow' | t }}`,
-        playSlideshow: `{{ 'sections.slideshow.play_slideshow' | t }}`,
-        recipientFormExpanded: `{{ 'recipient.form.expanded' | t }}`,
-        recipientFormCollapsed: `{{ 'recipient.form.collapsed' | t }}`,
-        countrySelectorSearchCount: `{{ 'localization.country_results_count' | t: count: '[count]' }}`,
-      };
+    (function () {
+      function handleFirstTab(e) {
+        if (e.keyCode === 9) { // the "I am a keyboard user" key
+          document.body.classList.add('user-is-tabbing');
+          window.removeEventListener('keydown', handleFirstTab);
+        }
+      }
+      window.addEventListener('keydown', handleFirstTab);
+    })();
     </script>
 
-    {%- if settings.predictive_search_enabled -%}
-      <script src="{{ 'predictive-search.js' | asset_url }}" defer="defer"></script>
-    {%- endif -%}
+    <script
+      src="{{ 'instantPage.min.js' | asset_url }}"
+      type="module"
+      defer
+    >
+    </script>
+    <script>(function(n, v) {/* eslint-disable-next-line max-len */if (window.Shopify && window.Shopify.theme && navigator && navigator.sendBeacon && window.Shopify.designMode) {if (sessionStorage.getItem('oots_beacon')) return;navigator.sendBeacon('https://app.outofthesandbox.com/beacon', new URLSearchParams({shop_domain: window.Shopify.shop.toLowerCase(),shop_id: '{{ shop.id }}',shop_email: '{{ shop.email }}',theme_name: n.toLowerCase(),theme_version: v.toLowerCase(),theme_store_id: window.Shopify.theme.theme_store_id,theme_id: window.Shopify.theme.id,theme_role: window.Shopify.theme.role,}));sessionStorage.setItem('oots_beacon', '');}}('empire','12.0.0'))</script>
+   <script defer src="{{ 'custom-theme.js' | asset_url }}"></script>
+   <script>
+document.addEventListener('DOMContentLoaded', function () {
+  const header = document.querySelector('.site-header-main') || document.querySelector('.site-header');
+  const panel = document.querySelector('.live-search-form__wrapper');
+  const toggles = Array.from(document.querySelectorAll('[data-asset="search-button"]'));
+const closeBtn = document.querySelector('[data-asset="search-modal-close"]');
 
-    {%- if settings.cart_type == 'drawer' -%}
-      <script src="{{ 'cart-drawer.js' | asset_url }}" defer="defer"></script>
-    {%- endif -%}
-  {%- render "ecom_footer"-%}
+  if (!header || !panel || toggles.length === 0) return;
 
-</body>
+  // If panel is currently not placed directly after header, move it there.
+  // This keeps all existing event handlers attached to the same DOM node.
+  const headerParent = header.parentNode;
+  if (panel.parentNode !== headerParent || panel.previousElementSibling !== header) {
+    // Insert panel immediately after header in the DOM
+    if (header.nextSibling) headerParent.insertBefore(panel, header.nextSibling);
+    else headerParent.appendChild(panel);
+  }
+
+  // Ensure the panel looks/behaves as part of page flow (CSS handles collapse)
+  panel.style.position = panel.style.position || 'relative';
+
+  function openPanel() {
+    panel.classList.add('open');
+    panel.setAttribute('aria-hidden', 'false');
+    // focus input after animation starts
+    const input = panel.querySelector('[data-live-search-input], input[type="search"], input[type="text"]');
+    setTimeout(()=> input && input.focus(), 120);
+  }
+
+  function closePanel() {
+    panel.classList.remove('open');
+    panel.setAttribute('aria-hidden', 'true');
+    const input = panel.querySelector('[data-live-search-input], input[type="search"], input[type="text"]');
+    input && input.blur();
+  }
+
+
+
+  
+  // Toggle search via header search buttons
+  toggles.forEach(btn => {
+    btn.addEventListener('click', function (ev) {
+      ev.preventDefault();
+      if (panel.classList.contains('open')) closePanel();
+      else openPanel();
+    });
+  });
+
+  // Close via modal-close button (if present)
+  if (closeBtn) closeBtn.addEventListener('click', closePanel);
+
+  // Close on Escape
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && panel.classList.contains('open')) closePanel();
+  });
+
+  // Click outside to close (but clicking inside header does NOT close)
+  document.addEventListener('click', function (e) {
+    if (!panel.classList.contains('open')) return;
+    const insidePanel = panel.contains(e.target);
+    const clickedToggle = toggles.some(t => t.contains(e.target));
+    const insideHeader = header.contains(e.target);
+    if (!insidePanel && !clickedToggle && !insideHeader) closePanel();
+  });
+
+  // If the theme updates panel position via JS, re-run the move on resize
+  window.addEventListener('resize', function () {
+    if (panel.parentNode !== header.parentNode || panel.previousElementSibling !== header) {
+      const headerParent = header.parentNode;
+      if (header.nextSibling) headerParent.insertBefore(panel, header.nextSibling);
+      else headerParent.appendChild(panel);
+    }
+  });
+});
+</script>
+<script>
+  (function(){
+    // run early, and again after page load
+    function restoreScrolling(){
+      try{
+        document.querySelectorAll('.modal-1, .modal-backdrop, .search-overlay, [data-search-modal-inner]').forEach(el=>{
+          el.style.display='none';
+          el.style.visibility='hidden';
+          el.style.pointerEvents='none';
+        });
+        ['modal-open','no-scroll','search-active']
+.forEach(c => document.body.classList.remove(c));
+
+        
+      }catch(e){}
+    }
+    // run on DOM ready, and again with a short delay (some themes add overlay after load)
+    if (document.readyState === 'complete' || document.readyState === 'interactive') restoreScrolling();
+    document.addEventListener('DOMContentLoaded', restoreScrolling);
+    setTimeout(restoreScrolling, 1500);
+  })();
+</script>
+
+{% render 'cart-drawer' %}
+<script src="{{ 'cart-drawer.js' | asset_url }}" ></script>
+
+<script>
+(function () {
+  'use strict';
+
+  // --- Utilities ---
+  function qs(sel, ctx) { return (ctx || document).querySelector(sel); }
+  function qsa(sel, ctx) { return Array.from((ctx || document).querySelectorAll(sel || '')); }
+
+  // Stop SVG <animateTransform> nodes (prevents rotation)
+  function stopSvgAnimations(root) {
+    try {
+      const svgs = (root || document).querySelectorAll('svg');
+      svgs.forEach(svg => {
+        const anims = svg.querySelectorAll('animateTransform');
+        if (anims.length) {
+          anims.forEach(a => a.parentNode && a.parentNode.removeChild(a));
+        }
+        // Also try to stop CSS animations on the SVG or its parents
+        svg.style.animation = 'none';
+        svg.style.webkitAnimation = 'none';
+      });
+    } catch (e) { /* ignore */ }
+  }
+
+  // Force-stop CSS spinner animations for matched nodes
+  function stopCssSpinner(node) {
+    try {
+      if (!node) return;
+      node.style.animation = 'none';
+      node.style.webkitAnimation = 'none';
+      node.style.transition = 'none';
+    } catch (e) {}
+  }
+
+  // Central cleanup function
+  function cleanLoadingStates() {
+    try {
+      // Re-enable submit buttons inside add-to-cart forms
+      qsa('form[action^="/cart/add"] button[type="submit"], form[action^="/cart/add"] [type="submit"]').forEach(btn => {
+        try { btn.disabled = false; } catch(e){}
+        try { btn.removeAttribute('aria-disabled'); } catch(e){}
+        try { btn.classList.remove('is-loading','loading','btn-loading','loading-spinner'); } catch(e){}
+      });
+
+      // Re-enable any disabled inputs/buttons that look related to cart drawer/add
+      qsa('button[disabled], input[disabled]').forEach(el => {
+        if (!el.closest) return;
+        if (el.closest('form[action^="/cart/add"]') || el.closest('.cart-drawer') || el.matches('[data-drawer-add], [data-cart-open], .atc-button--checkout, .atc-button--viewcart, .shopify-payment-button')) {
+          try { el.disabled = false; } catch(e){}
+          try { el.removeAttribute('aria-disabled'); } catch(e){}
+          try { el.classList.remove('is-loading','loading','btn-loading'); } catch(e){}
+        }
+      });
+
+      // Known spinner selectors to remove
+      const spinnerSelectors = [
+        '.spinner',
+        '.loading-spinner',
+        '.shopify-payment-button__spinner',
+        '.global-spinner',
+        '.form-spinner',
+        '.ajax-loading',
+        '.cart-loading',
+        '.btn-spinner',
+        '.atc-spinner',
+        '.__injected_spinner',      // our injected spinner
+        '.__detected_spinner'       // marker for detected theme spinner
+      ];
+
+      spinnerSelectors.forEach(sel => {
+        qsa(sel).forEach(n => {
+          try {
+            // Stop any animations inside node first
+            stopCssSpinner(n);
+            stopSvgAnimations(n);
+            n.parentNode && n.parentNode.removeChild(n);
+          } catch(e){}
+        });
+      });
+
+      // Also remove any stray inline SVG animateTransform elements anywhere inside buttons
+      qsa('button svg animateTransform, button svg animate').forEach(a => {
+        try { a.parentNode && a.parentNode.removeChild(a); } catch(e){}
+      });
+
+      // Also clear any spinner-like svg nodes inside buttons (fallback)
+      qsa('button svg').forEach(svg => {
+        // if the svg contains stroke-dasharray or animateTransform, remove it
+        try {
+          if (svg.querySelector('animateTransform') || svg.querySelector('animate')) {
+            svg.parentNode && svg.parentNode.removeChild(svg);
+          } else {
+            // stop CSS animation as backup
+            svg.style.animation = 'none';
+            svg.style.webkitAnimation = 'none';
+          }
+        } catch(e){}
+      });
+
+      // Remove common body classes added by loading states
+      ['is-loading','ajax-loading','loading','cart-loading','no-scroll','no-scroll--active'].forEach(c => {
+        try { document.body.classList.remove(c); } catch(e) {}
+      });
+
+      // Also ensure any 'is-loading' class on buttons is removed
+      qsa('button.is-loading, button.loading').forEach(btn => {
+        try { btn.classList.remove('is-loading','loading'); } catch(e) {}
+        try { btn.disabled = false; btn.removeAttribute('aria-disabled'); } catch(e) {}
+        // remove injected spinner if present
+        const inj = btn.querySelector('.__injected_spinner');
+        if (inj) try { inj.remove(); } catch(e) {}
+      });
+
+      // Finally: stop any remaining svg animations across page just in case
+      stopSvgAnimations(document);
+    } catch (err) {
+      console.warn('cleanLoadingStates error', err);
+    }
+  }
+
+  // Add a small visible spinner only when needed — but DON'T add if any existing spinner detected.
+  function setButtonLoading(btn) {
+    if (!btn) return;
+    try { btn.disabled = true; } catch(e){}
+    try { btn.setAttribute('aria-disabled','true'); } catch(e){}
+    try { btn.classList.add('is-loading'); } catch(e){}
+
+    // If there is any existing spinner inside the button, mark it and do not inject ours.
+    const existingSpinner = btn.querySelector('.spinner, .loading-spinner, .shopify-payment-button__spinner, .global-spinner, .form-spinner, .ajax-loading, .btn-spinner, .atc-spinner, svg animateTransform, svg animate');
+    if (existingSpinner) {
+      try { existingSpinner.classList && existingSpinner.classList.add('__detected_spinner'); } catch(e){}
+      // Also stop its animation briefly so user doesn't see infinite rotate if stuck
+      try { stopCssSpinner(existingSpinner); stopSvgAnimations(existingSpinner); } catch(e){}
+      return;
+    }
+
+    // inject our lightweight spinner if nothing else exists
+    if (!btn.querySelector('.__injected_spinner')) {
+      const s = document.createElement('span');
+      s.className = '__injected_spinner';
+      s.style.display = 'inline-block';
+      s.style.width = '18px';
+      s.style.height = '18px';
+      s.style.marginLeft = '8px';
+      s.style.verticalAlign = 'middle';
+      s.innerHTML = '<svg viewBox="0 0 50 50" style="width:18px;height:18px;"><circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-dasharray="31.4 31.4" stroke-dashoffset="0"><animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="0.9s" repeatCount="indefinite"/></circle></svg>';
+      try { btn.appendChild(s); } catch(e){}
+    }
+  }
+
+  // --- Patch fetch to call clean after cart fetches ---
+  if (typeof window.fetch === 'function' && !window.__cart_fetch_patched) {
+    const origFetch = window.fetch.bind(window);
+    window.fetch = function (input, init) {
+      const url = (typeof input === 'string') ? input : (input && input.url ? input.url : '');
+      const isCartEndpoint = url && (url.indexOf('/cart/add') !== -1 || url.indexOf('/cart/change') !== -1 || url.indexOf('/cart.js') !== -1 || url.indexOf('/cart.json') !== -1 || url.indexOf('cart/add.js') !== -1);
+      const p = origFetch(input, init);
+      if (isCartEndpoint) {
+        p.then(() => setTimeout(cleanLoadingStates, 80)).catch(() => setTimeout(cleanLoadingStates, 80));
+      } else {
+        // non-cart fetch: still remove stuck spinners occasionally
+        p.then(() => setTimeout(cleanLoadingStates, 250)).catch(() => {});
+      }
+      return p;
+    };
+    window.__cart_fetch_patched = true;
+  }
+
+  // Wrap jQuery.ajax to always cleanup
+  try {
+    const $ = window.jQuery || window.$;
+    if ($ && $.ajax && !$.ajax.__cart_wrapped) {
+      const orig = $.ajax;
+      $.ajax = function (...args) {
+        const jq = orig.apply(this, args);
+        try {
+          if (jq && typeof jq.always === 'function') jq.always(() => setTimeout(cleanLoadingStates, 60));
+        } catch(e){}
+        return jq;
+      };
+      $.ajax.__cart_wrapped = true;
+      $(document).off('.cart-clean').on('ajaxComplete.cart-clean', function () { setTimeout(cleanLoadingStates, 60); });
+    }
+  } catch(e){}
+
+  // On form submit, visually show loading on the clicked/submit button
+  document.addEventListener('submit', function (ev) {
+    try {
+      const form = ev.target;
+      if (!form || !form.matches) return;
+      if (!form.matches('form[action^="/cart/add"], form[action*="/cart/add"]')) return;
+      // find button user clicked, or fallback
+      let submitBtn = ev.submitter;
+      if (!submitBtn) submitBtn = form.querySelector('[type="submit"], button');
+      if (submitBtn) setButtonLoading(submitBtn);
+      // in case scripts never finish, force cleanup after some time
+      setTimeout(cleanLoadingStates, 1500);
+      setTimeout(cleanLoadingStates, 4000);
+    } catch(e){}
+  }, true);
+
+  // Delegated click for upsell / quick-add buttons
+  document.addEventListener('click', function (e) {
+    try {
+      const btn = e.target.closest ? e.target.closest('[data-drawer-add], [data-drawer-add-variant], [data-variant-add], [data-add-to-cart], .upsell-add, .product-upsell__add, .add-to-cart, button.add-to-cart') : null;
+      if (!btn) return;
+      setButtonLoading(btn);
+      setTimeout(cleanLoadingStates, 1500);
+      setTimeout(cleanLoadingStates, 4000);
+    } catch(e){}
+  }, true);
+
+  // MutationObserver: watch for spinners being added and clean shortly after
+  if (!window.__cart_clean_observer) {
+    try {
+      const mo = new MutationObserver(muts => {
+        let found = false;
+        for (const m of muts) {
+          if (m.addedNodes && m.addedNodes.length) {
+            for (const n of m.addedNodes) {
+              if (n.nodeType !== 1) continue;
+              if (n.matches && (n.matches('.spinner') || n.matches('.loading-spinner') || n.querySelector && (n.querySelector('.spinner') || n.querySelector('.loading-spinner') || n.querySelector('animateTransform')))) {
+                found = true; break;
+              }
+            }
+          }
+          if (found) break;
+        }
+        if (found) setTimeout(cleanLoadingStates, 120);
+      });
+      mo.observe(document.documentElement || document.body, { childList: true, subtree: true });
+      window.__cart_clean_observer = mo;
+    } catch(e){}
+  }
+
+  // run once on load
+  setTimeout(cleanLoadingStates, 60);
+  // expose for debugging
+  try { window.cleanLoadingStates = cleanLoadingStates; } catch(e){}
+
+})();
+
+</script>
+
+
+<script>
+(function () {
+  let lastVariantId = null;
+
+  function tryInitPaymentButton() {
+    const variantInput = document.querySelector('input[name="id"]');
+    if (!variantInput || !variantInput.value) return;
+
+    const variantId = variantInput.value;
+    if (variantId === lastVariantId) return;
+
+    lastVariantId = variantId;
+
+    // Give Empire ONE frame to finish UI updates
+    requestAnimationFrame(() => {
+      if (window.Shopify && Shopify.PaymentButton) {
+        Shopify.PaymentButton.init();
+      }
+    });
+  }
+
+  // 1️⃣ Empire fires this
+  document.addEventListener('variant:change', tryInitPaymentButton);
+
+  // 2️⃣ Fallback for themes that don’t emit consistently
+  document.addEventListener('change', function (e) {
+    if (e.target.closest('[name^="option"], .product-options, .variant-input')) {
+      tryInitPaymentButton();
+    }
+  });
+})();
+</script>
+
+<script>
+document.documentElement.style.setProperty(
+  '--header-height',
+  document.querySelector('.site-header')?.offsetHeight + 'px'
+);
+</script>
+
+        </body>  
 </html>

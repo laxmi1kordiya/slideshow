@@ -21,6 +21,13 @@
     {% assign tag_seo = shop.metaobjects.extra_collection.['14-k-gold-jewellery'] %}
     {{ tag_seo | json }}
 
+    {% if current_tags.size == 1 %}
+  {% assign tag_slug = current_tags.first | handleize %}
+  {% assign lookup_handle = collection.handle | append: '--' | append: tag_slug %}
+  {% assign tag_seo = shop.metaobjects.extra_collection[lookup_handle] %}
+   {{ tag_seo | json }}
+  {% endif %}
+
     <title>
       {{ page_title }}
       {%- if current_tags %} &ndash; tagged "{{ current_tags | join: ', ' }}"{% endif -%}

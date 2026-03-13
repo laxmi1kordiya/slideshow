@@ -78,7 +78,7 @@
           <span class="visually-hidden">{{ 'product_price.price.original' | t }}</span>
           <s class="cart-item--sale-price money">
             {%- if item_has_discounts -%}
-              {{ item.original_price | money }}
+              <span class="bcpo-cart-item-price" data-key="{{item.key}}"><span class="bcpo-cart-item-original-price" data-key="{{item.key}}">{{ item.original_price | money }}</span></span>
             {%- else -%}
               {{ compare_at_price | money }}
             {%- endif %}
@@ -88,9 +88,9 @@
 
         <span class="money {% if item_has_discounts %}cart-item--discount-price{% endif %}">
           {%- if item_has_discounts -%}
-            {{ item.final_price | money }}
+            <span class="bcpo-cart-item-price" data-key="{{item.key}}">{{ item.final_price | money }}</span>
           {%- else -%}
-            {{ item.original_price | money }}
+            <span class="bcpo-cart-item-price" data-key="{{item.key}}"><span class="bcpo-cart-item-original-price" data-key="{{item.key}}">{{ item.original_price | money }}</span></span>
           {%- endif %}
         </span>
       </div>
@@ -150,7 +150,7 @@
           </span>
 
           <s class="original-price money">
-            {{- item.original_line_price | money -}}
+            <span class="bcpo-cart-item-line-price" data-key="{{item.key}}"><span class="bcpo-cart-item-original-price" data-key="{{item.key}}">{{ item.original_price | money }}</span></span>
           </s>
 
           <span class="visually-hidden">
@@ -168,7 +168,7 @@
           aria-live="polite"
           data-cartitem-total
         >
-          {{ item.final_line_price | money }}
+          <span class="bcpo-cart-item-line-price" data-key="{{item.key}}">{{ item.final_price | money }}</span>
         </div>
       </div>
 
@@ -189,3 +189,5 @@
     </div>
   </div>
 </li>
+
+<!-- bcpo done -->

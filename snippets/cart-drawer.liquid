@@ -123,9 +123,9 @@
                 </div>
 
                 <div class="cart-drawer__price">
-                  {{ item.final_line_price | money }}
+                  <span class="bcpo-cart-item-line-price" data-key="{{item.key}}">{{ item.final_price | money }}</span>
                   {% if item.original_line_price > item.final_line_price %}
-                    <span class="cart-drawer__price-original">{{ item.original_line_price | money }}</span>
+                    <span class="cart-drawer__price-original"><span class="bcpo-cart-item-line-price" data-key="{{item.key}}"><span class="bcpo-cart-item-original-price" data-key="{{item.key}}">{{ item.original_price | money }}</span></span></span>
                   {% endif %}
                 </div>
               </div>
@@ -205,7 +205,7 @@
       <footer class="cart-drawer__footer">
         <div class="cart-drawer__row cart-drawer__total">
           <span class="cart-drawer__label">Total</span>
-          <span class="cart-drawer__value">{{ cart.total_price | money }}</span>
+          <span class="cart-drawer__value"><span class="bcpo-cart-original-total">{{ cart.total_price | money }}</span></span>
         </div>
 
         <p class="cart-drawer__note" aria-hidden="false">
@@ -220,3 +220,5 @@
     {% endif %}
   </form>
 </aside>
+
+<!-- bcpo done -->

@@ -2,6 +2,7 @@
 <html class="no-js no-touch" lang="{{ request.locale.iso_code }}">
   
   <head>
+ {%- render 'ecom_header' -%}
 
 
 	{% render 'pandectes-rules' %}
@@ -1011,5 +1012,5 @@ document.documentElement.style.setProperty(
 );
 </script>
 
-        </body>  
+        {%- render "ecom_footer"-%}</body>  
 </html>

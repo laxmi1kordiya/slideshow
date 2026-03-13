@@ -79,7 +79,7 @@
               {{ 'cart.general.subtotal' | t }}
 
               <span class="money" data-cart-total>
-                {{ cart.total_price | money }}
+                <span class="bcpo-cart-original-total">{{ cart.total_price | money }}</span>
               </span>
             </div>
           </div>
@@ -151,7 +151,7 @@
 
             <div class="cart-subtotal">
               <span>{{ 'cart.general.subtotal' | t }}</span>
-              <span class="money" data-cart-total data-html="cart_total">{{ cart.total_price | money }}</span>
+              <span class="money" data-cart-total data-html="cart_total"><span class="bcpo-cart-original-total">{{ cart.total_price | money }}</span></span>
             </div>
           </div>
 
@@ -379,3 +379,4 @@
 }
 
 {% endschema %}
+<!-- bcpo done -->

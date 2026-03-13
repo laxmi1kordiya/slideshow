@@ -20,10 +20,11 @@
       {{ request.path }} 
     {% assign tag_seo = shop.metaobjects.extra_collection.['14-k-gold-jewellery'] %}
     {{ tag_seo | json }}
-{{ current_tags.size }}
     {% if current_tags.size == 1 %}
+      {{ current_tags.first }}
   {% assign tag_slug = current_tags.first | handleize %}
   {% assign lookup_handle = collection.handle | append: '--' | append: tag_slug %}
+  {{ lookup_handle }}
   {% assign tag_seo = shop.metaobjects.extra_collection[lookup_handle] %}
    {{ tag_seo | json }}
    {% endif %}

@@ -17,15 +17,15 @@
 
     {%- render 'hs-critical-css' -%}
 
-      {% comment %} {{ request.path }}  {% endcomment %}
+      {{ request.path }} 
     {% assign tag_seo = shop.metaobjects.extra_collection.['14-k-gold-jewellery'] %}
-    {% comment %} {{ tag_seo | json }} {% endcomment %}
-    {% if current_tags.size == 1 %}
+    {{ tag_seo | json }}
+    {% comment %} {% if current_tags.size == 1 %}
       {{ current_tags.first }}
   {% assign tag_slug = current_tags.first | handleize %}
   {% assign lookup_handle = collection.handle | append: '--' | append: tag_slug %}
   {% assign tag_seo = shop.metaobjects.extra_collection[lookup_handle] %}
-   {% endif %}
+   {% endif %} {% endcomment %}
     <title>
       {{- page_title -}}
 

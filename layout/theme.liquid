@@ -17,6 +17,10 @@
       <link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
     {%- endunless -%}
 
+    {{ request.path }} 
+    {% assign tag_seo = shop.metaobjects.extra_collection.['14k-gold-jewellery'] %}
+    {{ tag_seo | json }}
+
     <title>
       {{ page_title }}
       {%- if current_tags %} &ndash; tagged "{{ current_tags | join: ', ' }}"{% endif -%}

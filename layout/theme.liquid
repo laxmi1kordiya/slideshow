@@ -17,101 +17,51 @@
 
     {%- render 'hs-critical-css' -%}
 
-    {% assign handle = request.path
-      | remove: '/collections/'
-      | replace: '/', '-'
-      | replace: '_', '-'
-      | replace: '+', '-'
-      | replace: '14k', '14-k' %}
-    {% assign extra_collection = shop.metaobjects.extra_collection[handle] %}
-    {% if extra_collection %}
-      <h1>{{ extra_collection.seo_title }}</h1>
-      <p>{{ extra_collection.seo_description }}</p>
-    {% endif %}
-
-
-
-
-
-
-
-
-
-    {%- comment -%} Enterprise filter SEO via filter_seo metaobjects {%- endcomment -%}
-    {% assign filter_seo_title = '' %}
-    {% assign filter_seo_description = '' %}
-    {% assign filter_seo_heading = '' %}
-    {% assign has_filter_seo = false %}
-
-    {% if template contains 'collection' and current_tags.size > 0 %}
-      {% for tag in current_tags %}
-        {% comment %} {% assign filter_handle = tag | handleize %} {% endcomment %}
-        {% assign filter_handle = tag | handleize
-          | replace: '/', '-'
-          | replace: '_', '-'
-          | replace: '+', '-'
-          | replace: '14k', '14-k' %}
-        {% assign seo_obj = shop.metaobjects.filter_seo[filter_handle] %}
-        seo_obj :{{ seo_obj |json }}
-        {% if seo_obj %}
-          {% assign has_filter_seo = true %}
-          {% if filter_seo_title != '' %}
-            {% assign filter_seo_title = filter_seo_title | append: ' ' %}
-            {% assign filter_seo_description = filter_seo_description | append: ' ' %}
-            {% assign filter_seo_heading = filter_seo_heading | append: ' ' %}
-          {% endif %}
-          {% assign filter_seo_title = filter_seo_title | append: seo_obj.seo_title %}
-          {% assign filter_seo_description = filter_seo_description | append: seo_obj.seo_description %}
-          {% assign filter_seo_heading = filter_seo_heading | append: seo_obj.seo_heading %}
-        {% endif %}
-      {% endfor %}
-    {% endif %}
-
+      {{ request.path }} 
+    {% assign tag_seo = shop.metaobjects.extra_collection.['14-k-gold-jewellery'] %}
+    {{ tag_seo | json }}
+    {% comment %} {% if current_tags.size == 1 %}
+      {{ current_tags.first }}
+  {% assign tag_slug = current_tags.first | handleize %}
+  {% assign lookup_handle = collection.handle | append: '--' | append: tag_slug %}
+  {% assign tag_seo = shop.metaobjects.extra_collection[lookup_handle] %}
+   {% endif %} {% endcomment %}
     <title>
-      {%- if has_filter_seo and filter_seo_title != blank -%}
-        {{- filter_seo_title | strip -}} | {{ collection.title }}
-        {%- unless filter_seo_title contains shop.name or collection.title contains shop.name -%}
-          {{- 'general.title.shop' | t: shop: shop.name -}}
-        {%- endunless -%}
-      {%- else -%}
-        {{- page_title -}}
+      {{- page_title -}}
 
-        {%- if current_tags -%}
-          {% capture cat_array %}{%- render 'advanced-tag-loop' -%}{% endcapture %}
-          {% assign cat_array = cat_array | split: '|' %}
-          {% assign title_tags = '' %}
-          {% assign meta_tags = current_tags | join: ', ' %}
-          {%- for tag in current_tags -%}
-            {% assign is_advanced_tag = false %}
-            {% assign cat = tag | split: '_' | first %}
+      {%- if current_tags -%}
+        {% capture cat_array %}{%- render 'advanced-tag-loop' -%}{% endcapture %}
+        {% assign cat_array = cat_array | split: '|' %}
+        {% assign title_tags = '' %}
+        {% assign meta_tags = current_tags | join: ', ' %}
+        {%- for tag in current_tags -%}
+          {% assign is_advanced_tag = false %}
+          {% assign cat = tag | split: '_' | first %}
 
-            {%- unless cat == tag -%}
-              {%- if cat_array contains cat -%}
-                {% assign is_advanced_tag = true %}
-                {% assign title_tags = title_tags | append: ', ' | append: tag | replace_first: '_', ': ' %}
-              {%- endif -%}
-            {%- endunless -%}
+          {%- unless cat == tag -%}
+            {%- if cat_array contains cat -%}
+              {% assign is_advanced_tag = true %}
+              {% assign title_tags = title_tags | append: ', ' | append: tag | replace_first: '_', ': ' %}
+            {%- endif -%}
+          {%- endunless -%}
 
-            {%- unless is_advanced_tag -%}
-              {% assign title_tags = title_tags | append: ', ' | append: tag %}
-            {%- endunless -%}
-          {%- endfor -%}
-          {{ 'general.title.tags' | t: tags: title_tags | remove_first: ', ' }}
-        {%- endif -%}
-
-        {%- if current_page != 1 -%}
-          {{- 'general.title.page' | t: page: current_page -}}
-        {%- endif -%}
-
-        {%- unless page_title contains shop.name -%}
-          {{- 'general.title.shop' | t: shop: shop.name -}}
-        {%- endunless -%}
+          {%- unless is_advanced_tag -%}
+            {% assign title_tags = title_tags | append: ', ' | append: tag %}
+          {%- endunless -%}
+        {%- endfor -%}
+        {{ 'general.title.tags' | t: tags: title_tags | remove_first: ', ' }}
       {%- endif -%}
+
+      {%- if current_page != 1 -%}
+        {{- 'general.title.page' | t: page: current_page -}}
+      {%- endif -%}
+
+      {%- unless page_title contains shop.name -%}
+        {{- 'general.title.shop' | t: shop: shop.name -}}
+      {%- endunless -%}
     </title>
 
-    {% if has_filter_seo and filter_seo_description != blank %}
-      <meta name="description" content="{{ filter_seo_description | strip | escape }}">
-    {% elsif page_description != blank %}
+    {% if page_description != blank %}
       <meta name="description" content="{{ page_description | escape }}">
     {% endif %}
 
@@ -120,12 +70,8 @@
     {% endif %}
 
     {% if template contains 'collection' and current_tags %}
-      {% if has_filter_seo %}
-        <link rel="canonical" href="{{ shop.url }}{{ request.path }}" />
-      {% else %}
-        <meta name="robots" content="noindex" />
-        <link rel="canonical" href="{{ shop.url }}{{ collection.url }}" />
-      {% endif %}
+      <meta name="robots" content="noindex" />
+      <link rel="canonical" href="{{ shop.url }}{{ collection.url }}" />
     {% else %}
       <link rel="canonical" href="{{ canonical_url }}" />
     {% endif %}

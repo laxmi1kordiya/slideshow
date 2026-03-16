@@ -136,11 +136,34 @@
         </figure>
       {% endif %}
 
+      {%- comment -%} Dynamic filter SEO heading {%- endcomment -%}
+      {% assign filter_seo_heading = '' %}
+      {% assign has_filter_seo = false %}
+      {% if current_tags.size > 0 %}
+        {% for tag in current_tags %}
+          {% assign filter_handle = tag | handleize %}
+          {% assign seo_obj = shop.metaobjects.filter_seo[filter_handle] %}
+          {% if seo_obj %}
+            {% assign has_filter_seo = true %}
+            {% if filter_seo_heading != '' %}
+              {% assign filter_seo_heading = filter_seo_heading | append: ' ' %}
+            {% endif %}
+            {% assign filter_seo_heading = filter_seo_heading | append: seo_obj.seo_heading %}
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+
       <h1 class="collection--title">
-        {{ collection.title }}
+        {% if has_filter_seo and filter_seo_heading != blank %}
+          {{ filter_seo_heading | strip }}
+        {% else %}
+          {{ collection.title }}
+        {% endif %}
       </h1>
 
-      {% if collection.description != blank %}
+      {% if has_filter_seo and filter_seo_heading != blank %}
+        {%- comment -%} Filter SEO replaces collection description {%- endcomment -%}
+      {% elsif collection.description != blank %}
         <div class="collection--description rte" data-collection-description>
           {{ collection.description }}
         </div>

@@ -1,0 +1,421 @@
+{
+  "sections": {
+    "image_with_text_overlay_nPMDRh": {
+      "type": "image-with-text-overlay",
+      "disabled": true,
+      "settings": {
+        "color_scheme": "",
+        "image_size": "lg",
+        "image": "shopify:\/\/shop_images\/BUY_CARABINEROS_RED_PRAWNS_FINE_WILD_UK_copy_2000x_2.webp",
+        "allow_transparent_header": false,
+        "reveal_on_scroll": true,
+        "remove_vertical_spacing": true,
+        "content_width": "md",
+        "mobile_text_position": "place-self-center text-center",
+        "desktop_text_position": "sm:place-self-center sm:text-center",
+        "overlay_color": "#000000",
+        "overlay_opacity": 0
+      }
+    },
+    "image_with_text_overlay_8XKRCY": {
+      "type": "image-with-text-overlay",
+      "blocks": {
+        "heading_n43mPP": {
+          "type": "heading",
+          "disabled": true,
+          "settings": {
+            "text": "Image with text overlay",
+            "heading_tag": "h4"
+          }
+        }
+      },
+      "block_order": [
+        "heading_n43mPP"
+      ],
+      "settings": {
+        "color_scheme": "",
+        "image_size": "lg",
+        "image": "shopify:\/\/shop_images\/Suppliers_Of_Wild_Mushroooms_FINE_WILD.jpg",
+        "allow_transparent_header": false,
+        "reveal_on_scroll": true,
+        "remove_vertical_spacing": true,
+        "content_width": "md",
+        "mobile_text_position": "place-self-center text-center",
+        "desktop_text_position": "sm:place-self-center sm:text-center",
+        "overlay_color": "#000000",
+        "overlay_opacity": 0
+      }
+    },
+    "rich_text_fr4TfR": {
+      "type": "rich-text",
+      "blocks": {
+        "heading_wt7Ybt": {
+          "type": "heading",
+          "settings": {
+            "text": "<em><strong>'THE ART OF GOOD EATING'<\/strong><\/em>",
+            "heading_tag": "h5"
+          }
+        },
+        "subheading_fTMtam": {
+          "type": "subheading",
+          "settings": {
+            "text": "Since 2015, we have been connecting home cooks, private chefs, and avid food enthusiasts with the elite ingredients behind some of the world's most celebrated kitchens"
+          }
+        }
+      },
+      "block_order": [
+        "heading_wt7Ybt",
+        "subheading_fTMtam"
+      ],
+      "settings": {
+        "color_scheme": "scheme-2",
+        "separate_section_with_border": false,
+        "content_width": "sm",
+        "text_position": "center",
+        "remove_vertical_spacing": false
+      }
+    },
+    "image_with_text_overlay_FLGmUj": {
+      "type": "image-with-text-overlay",
+      "settings": {
+        "color_scheme": "",
+        "image_size": "lg",
+        "image": "shopify:\/\/shop_images\/About_Fresh_White_Truffles_FINE_WILD_UK.jpg",
+        "allow_transparent_header": false,
+        "reveal_on_scroll": true,
+        "remove_vertical_spacing": true,
+        "content_width": "md",
+        "mobile_text_position": "place-self-center text-center",
+        "desktop_text_position": "sm:place-self-center sm:text-center",
+        "overlay_color": "#000000",
+        "overlay_opacity": 0
+      }
+    },
+    "image_with_text_overlay_B6VbNK": {
+      "type": "image-with-text-overlay",
+      "disabled": true,
+      "settings": {
+        "color_scheme": "",
+        "image_size": "lg",
+        "image": "shopify:\/\/shop_images\/Buy_Fresh_Girolle_Mushrooms_FINE_WILD.jpg",
+        "allow_transparent_header": false,
+        "reveal_on_scroll": true,
+        "remove_vertical_spacing": true,
+        "content_width": "md",
+        "mobile_text_position": "place-self-center text-center",
+        "desktop_text_position": "sm:place-self-center sm:text-center",
+        "overlay_color": "#000000",
+        "overlay_opacity": 0
+      }
+    },
+    "rich_text_39zPi7": {
+      "type": "rich-text",
+      "blocks": {
+        "subheading_DWbCF9": {
+          "type": "subheading",
+          "settings": {
+            "text": "Heritage French poultry, Wild mushrooms and truffles foraged from ancient woodlands. Pristine seafood like scarlet Carabineros and wild King Crab, each selected with unwavering commitment to both flavour and sustainability"
+          }
+        }
+      },
+      "block_order": [
+        "subheading_DWbCF9"
+      ],
+      "settings": {
+        "color_scheme": "scheme-2",
+        "separate_section_with_border": true,
+        "content_width": "sm",
+        "text_position": "center",
+        "remove_vertical_spacing": false
+      }
+    },
+    "image_with_text_j7YCc9": {
+      "type": "image-with-text",
+      "blocks": {
+        "subheading_WajX6h": {
+          "type": "subheading",
+          "settings": {
+            "text": "Food with integrity, sourced through relationships with artisans who share our devotion to sourcing the finest produce at its peak"
+          }
+        }
+      },
+      "block_order": [
+        "subheading_WajX6h"
+      ],
+      "disabled": true,
+      "name": "t:sections.image_with_text.presets.image_with_text.name",
+      "settings": {
+        "color_scheme": "scheme-2",
+        "separate_section_with_border": true,
+        "image": "shopify:\/\/shop_images\/Landes_Chicken_FINE_WILD.jpg",
+        "reveal_on_scroll": true,
+        "image_position": "end",
+        "content_width": "sm",
+        "remove_vertical_spacing": true
+      }
+    },
+    "image_with_text_gApRD9": {
+      "type": "image-with-text",
+      "blocks": {
+        "subheading_cFCABG": {
+          "type": "subheading",
+          "settings": {
+            "text": "Food with integrity, sourced through relationships with artisans who share our devotion to sourcing the finest produce at its peak"
+          }
+        }
+      },
+      "block_order": [
+        "subheading_cFCABG"
+      ],
+      "settings": {
+        "color_scheme": "scheme-2",
+        "separate_section_with_border": false,
+        "image": "shopify:\/\/shop_images\/FINE_WILD_Fresh_Almalfi_Lemons_Uk.jpg",
+        "reveal_on_scroll": true,
+        "image_position": "end",
+        "content_width": "sm",
+        "remove_vertical_spacing": true
+      }
+    },
+    "image_with_text_zNBxWp": {
+      "type": "image-with-text",
+      "blocks": {
+        "subheading_XKwhkj": {
+          "type": "subheading",
+          "settings": {
+            "text": "Our goal is to satisfy the fine gourmets for whom the pleasure of great food should not come at the expense of health or the planet"
+          }
+        }
+      },
+      "block_order": [
+        "subheading_XKwhkj"
+      ],
+      "settings": {
+        "color_scheme": "scheme-2",
+        "separate_section_with_border": false,
+        "image": "shopify:\/\/shop_images\/Buy_Fine_WIne_FINE_WILD_UK.jpg",
+        "reveal_on_scroll": true,
+        "image_position": "start",
+        "content_width": "sm",
+        "remove_vertical_spacing": true
+      }
+    },
+    "rich_text_wHHaCX": {
+      "type": "rich-text",
+      "blocks": {
+        "subheading_QV7bUf": {
+          "type": "subheading",
+          "settings": {
+            "text": "We don't do smoke and mirrors, we try to supply food that is beautiful, delicious, and thoughtful"
+          }
+        }
+      },
+      "block_order": [
+        "subheading_QV7bUf"
+      ],
+      "settings": {
+        "color_scheme": "scheme-2",
+        "separate_section_with_border": false,
+        "content_width": "sm",
+        "text_position": "center",
+        "remove_vertical_spacing": false
+      }
+    },
+    "image_with_text_overlay_TY7f7p": {
+      "type": "image-with-text-overlay",
+      "settings": {
+        "color_scheme": "",
+        "image_size": "lg",
+        "image": "shopify:\/\/shop_images\/FINE_WILD_UK_Supplier_of_Fresh_Truffles_Carabineros_Iberico_Ham_Wagyu_Beef_63f9a6a5-0d91-41c8-a385-c20acff74dfd.jpg",
+        "allow_transparent_header": false,
+        "reveal_on_scroll": true,
+        "remove_vertical_spacing": true,
+        "content_width": "md",
+        "mobile_text_position": "place-self-center text-center",
+        "desktop_text_position": "sm:place-self-center sm:text-center",
+        "overlay_color": "#000000",
+        "overlay_opacity": 0
+      }
+    },
+    "rich_text_DNeyd3": {
+      "type": "rich-text",
+      "blocks": {
+        "subheading_dVE4U8": {
+          "type": "subheading",
+          "settings": {
+            "text": "WE DELIVER TO UK MAINLAND Tuesday to Saturday. Choose your delivery date at the checkout"
+          }
+        }
+      },
+      "block_order": [
+        "subheading_dVE4U8"
+      ],
+      "settings": {
+        "color_scheme": "scheme-2",
+        "separate_section_with_border": false,
+        "content_width": "sm",
+        "text_position": "center",
+        "remove_vertical_spacing": false
+      }
+    },
+    "image_with_text_overlay_bU88kd": {
+      "type": "image-with-text-overlay",
+      "settings": {
+        "color_scheme": "",
+        "image_size": "lg",
+        "image": "shopify:\/\/shop_images\/PETITE_VIOLET_ARTICHOKES_FINE_WILD_UK_9a9f755d-d863-4c4c-82d5-296148a80a3b.jpg",
+        "mobile_image": "shopify:\/\/shop_images\/VIOLET_ARTICHOKES_FINE_WILD_UK.jpg",
+        "allow_transparent_header": false,
+        "reveal_on_scroll": true,
+        "remove_vertical_spacing": true,
+        "content_width": "md",
+        "mobile_text_position": "place-self-center text-center",
+        "desktop_text_position": "sm:place-self-center sm:text-center",
+        "overlay_color": "#000000",
+        "overlay_opacity": 0
+      }
+    },
+    "rich_text_aL3aEF": {
+      "type": "rich-text",
+      "blocks": {
+        "subheading_aatge8": {
+          "type": "subheading",
+          "settings": {
+            "text": "Order Before 2pm For Uk Next Day Delivery"
+          }
+        }
+      },
+      "block_order": [
+        "subheading_aatge8"
+      ],
+      "settings": {
+        "color_scheme": "scheme-2",
+        "separate_section_with_border": false,
+        "content_width": "sm",
+        "text_position": "center",
+        "remove_vertical_spacing": false
+      }
+    },
+    "image_with_text_overlay_7QGdiL": {
+      "type": "image-with-text-overlay",
+      "name": "t:sections.image_with_text_overlay.presets.image_with_text_overlay.name",
+      "settings": {
+        "color_scheme": "",
+        "image_size": "lg",
+        "image": "shopify:\/\/shop_images\/Premium_Vegetables_Salads_FINE_WILD_Restaurant-Quality_Produce.jpg",
+        "mobile_image": "shopify:\/\/shop_images\/Premium_Vegetables_Salads_FINE_WILDUK_Restaurant-Quality_Produce.jpg",
+        "allow_transparent_header": false,
+        "reveal_on_scroll": true,
+        "remove_vertical_spacing": true,
+        "content_width": "md",
+        "mobile_text_position": "place-self-center text-center",
+        "desktop_text_position": "sm:place-self-center sm:text-center",
+        "overlay_color": "#000000",
+        "overlay_opacity": 0
+      }
+    },
+    "rich_text_CWT8bj": {
+      "type": "rich-text",
+      "blocks": {
+        "subheading_bXTPe6": {
+          "type": "subheading",
+          "settings": {
+            "text": "OVER 3000 5*  Reviews - FOOD STANDARDS AGENCY (FSA) RATING 5*"
+          }
+        }
+      },
+      "block_order": [
+        "subheading_bXTPe6"
+      ],
+      "settings": {
+        "color_scheme": "scheme-2",
+        "separate_section_with_border": true,
+        "content_width": "sm",
+        "text_position": "center",
+        "remove_vertical_spacing": false
+      }
+    },
+    "rich_text_Lai7RC": {
+      "type": "rich-text",
+      "blocks": {
+        "heading_4mMgnp": {
+          "type": "heading",
+          "settings": {
+            "text": "",
+            "heading_tag": "h1"
+          }
+        },
+        "richtext_N3bCBy": {
+          "type": "richtext",
+          "settings": {
+            "content": ""
+          }
+        }
+      },
+      "block_order": [
+        "heading_4mMgnp",
+        "richtext_N3bCBy"
+      ],
+      "disabled": true,
+      "name": "t:sections.rich_text.presets.rich_text.name",
+      "settings": {
+        "color_scheme": "scheme-2",
+        "separate_section_with_border": true,
+        "content_width": "sm",
+        "text_position": "center",
+        "remove_vertical_spacing": false
+      }
+    },
+    "featured_collections_zQHn9d": {
+      "type": "featured-collections",
+      "blocks": {
+        "collection_VP8bd4": {
+          "type": "collection",
+          "settings": {
+            "collection": "fine-wild-best-sellers",
+            "products_count": 4,
+            "title": "JULY INSPIRATION",
+            "link_url": "shopify:\/\/collections\/fine-wild-best-sellers",
+            "link_text": ""
+          }
+        }
+      },
+      "block_order": [
+        "collection_VP8bd4"
+      ],
+      "disabled": true,
+      "name": "t:sections.featured_collections.presets.featured_collections.name",
+      "settings": {
+        "color_scheme": "scheme-2",
+        "separate_section_with_border": false,
+        "hide_product_information": false,
+        "stack_products": false,
+        "products_per_row_mobile": "2",
+        "products_per_row_desktop": 3,
+        "horizontal_spacing_factor": 0.2,
+        "vertical_spacing_factor": 0.2,
+        "subheading": ""
+      }
+    }
+  },
+  "order": [
+    "image_with_text_overlay_nPMDRh",
+    "image_with_text_overlay_8XKRCY",
+    "rich_text_fr4TfR",
+    "image_with_text_overlay_FLGmUj",
+    "image_with_text_overlay_B6VbNK",
+    "rich_text_39zPi7",
+    "image_with_text_j7YCc9",
+    "image_with_text_gApRD9",
+    "image_with_text_zNBxWp",
+    "rich_text_wHHaCX",
+    "image_with_text_overlay_TY7f7p",
+    "rich_text_DNeyd3",
+    "image_with_text_overlay_bU88kd",
+    "rich_text_aL3aEF",
+    "image_with_text_overlay_7QGdiL",
+    "rich_text_CWT8bj",
+    "rich_text_Lai7RC",
+    "featured_collections_zQHn9d"
+  ]
+}

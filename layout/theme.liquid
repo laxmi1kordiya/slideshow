@@ -17,9 +17,27 @@
 
     {%- render 'hs-critical-css' -%}
 
-      {{ request.path }} 
+      {% comment %} {{ request.path }} 
     {% assign tag_seo = shop.metaobjects.extra_collection.['14-k-gold-jewellery'] %}
-    {{ tag_seo | json }}
+    {{ tag_seo | json }} {% endcomment %}
+
+    {{ request.path }}
+    {% assign handle = request.path
+      | remove: '/collections/'
+      | remove: 'type_'
+      | remove: 'material_'
+      | remove: 'thread-type_'
+      | remove: 'stone_'
+      | replace: '+', '_'
+      | replace: '/', '_' %}
+    {{ handle }}
+    {% assign extra_collection = shop.metaobjects.extra_collection[handle] %}
+    {{ extra_collection | json }}
+    {% if extra_collection %}
+      <h1>{{ extra_collection.seo_title }}</h1>
+      <p>{{ extra_collection.seo_description }}</p>
+    {% endif %}
+
     {% comment %} {% if current_tags.size == 1 %}
       {{ current_tags.first }}
   {% assign tag_slug = current_tags.first | handleize %}
